@@ -4,6 +4,44 @@ name: 박소연
 domain: 에이전트
 color: "#9ece6a"
 cards:
+  - title: "실시간 면접 WebSocket — 말이 끝나면 다음 질문"
+    feature: "PR#54"
+    status: done
+    done: 2026-09-07
+    note: "ADR-0029 · 답변 단위가 아닌 실시간 스트리밍 경로"
+    detail: |
+      영상·오디오를 실시간으로 흘려보내며 답이 끝나는 지점에서 다음 질문으로 넘어가는 경로.
+
+  - title: "진위 판별 서비스 배포 — Dockerfile + 운영 compose + /ai/*"
+    feature: "PR#42"
+    status: done
+    done: 2026-09-07
+    note: "CPU 모델·GPU 불필요"
+    detail: |
+      표정·음성 진위 판별 서비스(ADR-0029)를 컨테이너로 만들어 운영 compose 에 붙임.
+      리버스 프록시 /ai/* 로 접근, CPU 모델이라 GPU 서버 불필요 — 같은 EC2 에서 돌린다.
+
+  - title: "표정·음성 진위 판별 도입 결정 — ADR-0029"
+    feature: "PR#45"
+    status: done
+    done: 2026-09-07
+    detail: |
+      이전 결정(표정 분석 제외)을 개정, 진위 판별을 재도입하는 결정 문서.
+
+  - title: "자소서 주장 → 면접 꼬리 질문 생성"
+    feature: "PR#12"
+    status: done
+    done: 2026-09-04
+    detail: |
+      자기소개서에 나온 주장을 근거로 면접에서 물어볼 후속 질문을 생성.
+
+  - title: "면접 영상 진위 판별 서비스 초안"
+    feature: "PR#3"
+    status: done
+    done: 2026-09-04
+    detail: |
+      진위 판별 서비스의 초기 형태를 저장소에 추가.
+
   - title: "지원자 칸반 보드 UI (드래그 단계 이동)"
     feature: "D2·D3"
     status: done

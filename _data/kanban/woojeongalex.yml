@@ -4,6 +4,78 @@ name: 이우정
 domain: 백엔드
 color: "#f7768e"
 cards:
+  - title: "면접 답변 카메라 녹화 + 진위 분석 호출"
+    feature: "PR#56"
+    status: done
+    done: 2026-09-07
+    note: "ADR-0029 후속 — 프론트 녹화와 분석 서비스를 연결"
+    detail: |
+      면접 답변 시 카메라 녹화를 받아 진위 판별 서비스로 넘기는 경로를 붙였다.
+
+  - title: "SES MessageId 를 email_logs 행에 남긴다"
+    feature: "PR#58"
+    status: done
+    done: 2026-09-07
+    note: "보냈다는데 안 왔다를 확인할 자리"
+    detail: |
+      메일 전송 결과(공급자 발급 식별자)를 로그 행에 저장 — 이후 반송 조사 시 근거로.
+
+  - title: "면접 답변 음성 → 전사(STT) — audio_duration_sec 채움"
+    feature: "PR#40 PR#44"
+    status: done
+    done: 2026-09-07
+    note: "면접 설계 §5-4 · 발화 속도 진행 보조까지"
+    detail: |
+      지원자 음성 답변을 텍스트로 옮기는 경로(STT)와, 말이 유난히 느리면 질문을 바꿔 보자고 하는 진행 보조 규칙까지.
+
+  - title: "지원 현황 조회 — 이메일 링크로 지원자 포털"
+    feature: "PR#52"
+    status: done
+    done: 2026-09-07
+    note: "신-1 지원자 포털"
+    detail: |
+      로그인 없이 이메일로 받은 링크(토큰)로 자기 지원 현황을 확인하는 경로. 담당자 화면과 분리된 지원자 전용.
+
+  - title: "면접 진행 보조 — 짧은 답이면 되묻기, 두 번 짧으면 쉬어가기 권유"
+    feature: "PR#33"
+    status: done
+    done: 2026-09-07
+    detail: |
+      답변 길이가 유난히 짧으면 되묻고, 두 번 연속이면 잠시 쉬는 것을 권한다.
+
+  - title: "앵커 게시 자동화 안정화 — 토큰 재발급·실패 시 이슈·체인 사전 검증"
+    feature: "PR#21 PR#25 PR#31"
+    status: done
+    done: 2026-09-07
+    note: "이틀 동안 아무도 모르던 실패를 눈에 보이게"
+    detail: |
+      앵커 크론이 12시간 만료 토큰으로 죽던 문제 해결(매 실행마다 새로 로그인), 실패 시 GitHub 이슈로 알림.
+      이름표(CHAIN_NETWORK)와 실제 RPC 체인 식별자가 어긋나면 전송 전에 멈춰 잘못된 체인 오염 차단.
+
+  - title: "배포 이미지가 스스로 스키마 이행 — 호스트 마운트 불필요"
+    feature: "PR#20"
+    status: done
+    done: 2026-09-07
+    detail: |
+      DB 스키마 이행(alembic)을 컨테이너 이미지 자체가 실행하게 해서, 서버 호스트에 코드 마운트가 필요 없게.
+
+  - title: "로컬 pytest 함정 2개 수정 — .env 미로드·시드 이름 충돌"
+    feature: "PR#24"
+    status: done
+    done: 2026-09-07
+    note: "새 개발자가 clone 후 바로 실행 가능"
+    detail: |
+      로컬 pytest 가 .env 의 DATABASE_URL 을 못 읽어 옛 DB 로 붙던 것과, 시드 이름이 겹쳐 실패하던 것을 코드에서 봉인.
+
+  - title: "폴리곤 서명을 Actions 로 · OpenTimestamps 병행 (ADR-0028)"
+    feature: "PR#15 PR#13"
+    status: done
+    done: 2026-09-04
+    note: "서버에 개인키 없음"
+    detail: |
+      앵커 게시 개인키를 서버에서 빼서 GitHub Actions 로 이관, 시간 증명(OpenTimestamps) 병행.
+      결정 문서 개정에 관리 권한 2인·팀장 리뷰 게이트 삭제 반영.
+
   - title: "JWT 인증 · 역할 3종 (A1~A3)"
     feature: "A"
     status: done
