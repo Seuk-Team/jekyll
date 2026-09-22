@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Qwen vs Claude 정량·품질 비교</title>
+<style>
+  /* ── 검증된 기본 팔레트 (dataviz 참조 인스턴스) ── */
+  :root{
+    color-scheme:light;
+    --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+    --s1:#2a78d6;  /* Claude Haiku (slot1 blue) */
+    --s2:#eb6834;  /* Qwen 학습 전 (slot2 orange) */
+    --s3:#1baf7a;  /* Qwen v9 (slot3 aqua) */
+    --good:#0ca30c; --warning:#fab219; --serious:#ec835a; --critical:#d03b3b;
+    --good-text:#006300;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme:dark;
+      --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+      --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good-text:#0ca30c;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme:dark;
+    --page:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,.10);
+    --s1:#3987e5; --s2:#d95926; --s3:#199e70; --good-text:#0ca30c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI","Malgun Gothic",sans-serif;font-size:15px;line-height:1.65}
+  .wrap{max-width:940px;margin:0 auto;padding:0 16px 72px}
+  header{padding:38px 0 18px}
+  header .kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  header h1{margin:6px 0 6px;font-size:26px;line-height:1.3}
+  header p{margin:0;color:var(--ink2);font-size:14px}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:rgba(11,11,11,.06);padding:1px 5px;border-radius:4px}
+  h2{font-size:18px;margin:34px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--grid)}
+  h2 .n{color:var(--muted);font-weight:600;margin-right:8px;font-size:14px}
+  .card{background:var(--surface);border:1px solid var(--ring);border-radius:8px;padding:18px 20px;margin:12px 0}
+  .sub{color:var(--ink2);font-size:13px;margin:0 0 12px}
+  .note{font-size:13px;color:var(--ink2);border-left:3px solid var(--warning);padding:8px 12px;background:rgba(250,178,25,.08);border-radius:4px;margin:12px 0}
+  .concl{font-size:14.5px;border-left:3px solid var(--good);padding:10px 14px;background:rgba(12,163,12,.07);border-radius:4px;margin:12px 0}
+
+  /* 통계 타일 */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tile{background:var(--surface);border:1px solid var(--ring);border-radius:8px;padding:14px 16px}
+  .tile .lab{font-size:12px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+  .sw{width:10px;height:10px;border-radius:2px;display:inline-block}
+  .tile .val{font-size:34px;font-weight:700;margin-top:4px;letter-spacing:-.01em}
+  .tile .val small{font-size:13px;color:var(--ink2);font-weight:500;margin-left:4px}
+  .tile .d{font-size:12px;color:var(--muted);margin-top:2px}
+
+  /* 범례 */
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin:0 0 12px}
+  .legend span{display:flex;align-items:center;gap:6px}
+
+  /* 가로 막대 */
+  .bars{display:flex;flex-direction:column;gap:10px}
+  .row{display:grid;grid-template-columns:150px 1fr 64px;align-items:center;gap:12px}
+  .row .k{font-size:13px;color:var(--ink2)}
+  .row .k b{color:var(--ink);font-weight:600}
+  .track{position:relative;height:14px;background:transparent;border-bottom:1px solid var(--grid)}
+  .fill{position:absolute;left:0;top:0;height:14px;border-radius:0 4px 4px 0;transition:opacity .15s}
+  .fill:hover{opacity:.82}
+  .row .v{font-size:13px;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .row .v small{color:var(--muted);font-size:11px;margin-left:3px}
+  /* 그룹 막대 (여러 시리즈) */
+  .grp .row{grid-template-columns:150px 1fr 64px}
+  .grp .track{height:auto;border-bottom:1px solid var(--grid);padding-bottom:3px}
+  .grp .lane{position:relative;height:12px;margin-bottom:2px}
+  .grp .lane .fill{height:12px}
+  .grp .vals{font-size:12px;text-align:right;line-height:1.35;font-variant-numeric:tabular-nums}
+  .grp .vals span{display:block;color:var(--ink)}
+
+  /* 분절(실패의 질) */
+  .seg{display:flex;height:16px;border-radius:4px;overflow:hidden;gap:2px;margin:6px 0 8px}
+  .seg i{display:block;height:100%;border-radius:3px}
+  .segl{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink2)}
+  .segl span{display:flex;align-items:center;gap:6px}
+  .ic{font-size:11px;font-weight:800}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--grid);vertical-align:top}
+  th{color:var(--ink2);font-weight:600;font-size:12px}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .ok{color:var(--good-text);font-weight:700} .bad{color:var(--critical);font-weight:700}
+  details{margin-top:8px} summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+  footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--grid);color:var(--muted);font-size:12.5px}
+  @media (max-width:640px){.tiles{grid-template-columns:1fr}.row,.grp .row{grid-template-columns:110px 1fr 56px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="kicker">Team Seuk · Arda · Qwen vs Claude</div>
+  <h1>자체학습 Qwen vs Claude API — 정량·품질 비교</h1>
+  <p>동일 케이스 23건 · 동일 채점기(<code>judge.py</code>) · 09-11 / 09-12 / 09-17 실측. 모든 수치는 저장소 eval·벤치 데이터 인용 · 작성 2026-09-22</p>
+</header>
+
+<div class="concl"><b>한 줄 결론</b> — 같은 자로 재니 학습 전 Qwen <b>26.1%</b> → Claude <b>69.6%</b> 로 격차가 컸고, 자체학습 v9가 <b>73.9%</b>로 넘어섰다. 다만 <b>품질의 성격</b>이 다르다: Qwen(학습 전)은 "판단은 맞는데 도구 언어를 못 말함", Claude는 "안전한 순서로 가다 단일턴 채점에 걸림", v9는 "남은 실패 6건 중 5건이 UX상 정상". 심사 서빙은 품질·안정성·트래픽 이유로 클라우드+Claude 확정.</div>
+
+<!-- 1. 헤드라인 -->
+<h2><span class="n">1</span>도구 호출 정확도 — 같은 자(judge.py) · 23건</h2>
+<div class="tiles">
+  <div class="tile"><div class="lab"><span class="sw" style="background:var(--s2)"></span>Qwen 학습 전 · 09-11</div><div class="val">26.1<small>% · 6/23</small></div><div class="d">도메인 미스매치 — 도구 포맷 미학습</div></div>
+  <div class="tile"><div class="lab"><span class="sw" style="background:var(--s1)"></span>Claude Haiku 4.5 · 09-12</div><div class="val">69.6<small>% · 16/23</small></div><div class="d">gold 상한 19/23 대비 84%</div></div>
+  <div class="tile"><div class="lab"><span class="sw" style="background:var(--s3)"></span>Qwen v9 학습 후 · 09-17</div><div class="val">73.9<small>% · 17/23</small></div><div class="d">v6·v7·v8 상회 · 실질 ~95%+</div></div>
+</div>
+<div class="card">
+  <p class="sub">pass = Hard 3개(도구 이름·no-tool 위반 없음·확인 문구) 전부 + Soft(인자 또는 키워드) 하나 이상. 이론상 최대(gold 상한) 19/23.</p>
+  <div class="bars">
+    <div class="row"><div class="k"><b>Qwen 학습 전</b></div><div class="track"><div class="fill" style="width:26.1%;background:var(--s2)" title="6/23 · 26.1%"></div></div><div class="v">26.1<small>%</small></div></div>
+    <div class="row"><div class="k"><b>Claude Haiku</b></div><div class="track"><div class="fill" style="width:69.6%;background:var(--s1)" title="16/23 · 69.6%"></div></div><div class="v">69.6<small>%</small></div></div>
+    <div class="row"><div class="k"><b>Qwen v9</b></div><div class="track"><div class="fill" style="width:73.9%;background:var(--s3)" title="17/23 · 73.9%"></div></div><div class="v">73.9<small>%</small></div></div>
+    <div class="row"><div class="k">gold 상한</div><div class="track"><div class="fill" style="width:82.6%;background:var(--axis)" title="19/23 · 82.6%"></div></div><div class="v">82.6<small>%</small></div></div>
+  </div>
+</div>
+
+<!-- 2. 판정 항목별 -->
+<h2><span class="n">2</span>품질 분해 ① — 판정 항목별 통과율</h2>
+<div class="card grp">
+  <p class="sub">"맞았다/틀렸다"를 5개 항목으로 쪼개면 <b>어디서 무너졌는지</b>가 보인다. (v9는 항목별 원자료 미보존 → 총점만)</p>
+  <div class="legend"><span><span class="sw" style="background:var(--s2)"></span>Qwen 학습 전</span><span><span class="sw" style="background:var(--s1)"></span>Claude Haiku</span></div>
+  <div class="bars">
+    <div class="row"><div class="k"><b>도구 이름 일치</b><br><span style="font-size:11px;color:var(--muted)">Hard</span></div><div class="track"><div class="lane"><div class="fill" style="width:26%;background:var(--s2)" title="Qwen 6/23"></div></div><div class="lane"><div class="fill" style="width:70%;background:var(--s1)" title="Claude 16/23"></div></div></div><div class="vals"><span>26%</span><span>70%</span></div></div>
+    <div class="row"><div class="k"><b>no-tool 위반 없음</b><br><span style="font-size:11px;color:var(--muted)">Hard · 부르지 말아야 할 때 안 부름</span></div><div class="track"><div class="lane"><div class="fill" style="width:100%;background:var(--s2)" title="Qwen 23/23"></div></div><div class="lane"><div class="fill" style="width:96%;background:var(--s1)" title="Claude 22/23"></div></div></div><div class="vals"><span>100%</span><span>96%</span></div></div>
+    <div class="row"><div class="k"><b>확인 문구</b><br><span style="font-size:11px;color:var(--muted)">Hard · 쓰기 도구 전 "진행할까요?"</span></div><div class="track"><div class="lane"><div class="fill" style="width:91%;background:var(--s2)" title="Qwen 21/23"></div></div><div class="lane"><div class="fill" style="width:87%;background:var(--s1)" title="Claude 20/23"></div></div></div><div class="vals"><span>91%</span><span>87%</span></div></div>
+    <div class="row"><div class="k"><b>인자·응답 문구</b><br><span style="font-size:11px;color:var(--muted)">Soft · 둘 중 하나</span></div><div class="track"><div class="lane"><div class="fill" style="width:78%;background:var(--s2)" title="Qwen 18/23"></div></div><div class="lane"><div class="fill" style="width:83%;background:var(--s1)" title="Claude 19/23"></div></div></div><div class="vals"><span>78%</span><span>83%</span></div></div>
+  </div>
+  <div class="note"><b>읽는 법:</b> 학습 전 Qwen의 약점은 <b>딱 하나 — 도구 이름 일치(26%)</b>. 나머지 셋(위반 없음 100%·확인 문구 91%·응답 78%)은 Claude와 비슷하거나 낫다. 즉 "무엇을 해야 하는지"는 알았는데 <code>&lt;tool_call&gt;</code> 포맷을 못 냈다 — <code>&lt;think&gt;</code> 안에서 "search_applications 를 불러야 한다"고 추론하고도 실제 호출을 안 한 케이스가 대부분. 이것이 <b>도메인 미스매치</b>의 실체이고, QLoRA 학습이 정확히 이 한 축을 고쳐 v9 73.9%가 됐다.</div>
+  <details><summary>표로 보기</summary>
+  <table><tr><th>항목</th><th class="num">Qwen 학습 전</th><th class="num">Claude Haiku</th></tr>
+  <tr><td>도구 이름 일치 (Hard)</td><td class="num">6/23 · 26%</td><td class="num">16/23 · 70%</td></tr>
+  <tr><td>no-tool 위반 없음 (Hard)</td><td class="num">23/23 · 100%</td><td class="num">22/23 · 96%</td></tr>
+  <tr><td>확인 문구 (Hard)</td><td class="num">21/23 · 91%</td><td class="num">20/23 · 87%</td></tr>
+  <tr><td>인자·응답 문구 (Soft)</td><td class="num">18/23 · 78%</td><td class="num">19/23 · 83%</td></tr></table></details>
+</div>
+
+<!-- 3. 카테고리별 -->
+<h2><span class="n">3</span>품질 분해 ② — 질문 유형별 정확도</h2>
+<div class="card grp">
+  <p class="sub">유형마다 강약이 갈린다. 막대는 통과 건수 / 유형 건수.</p>
+  <div class="legend"><span><span class="sw" style="background:var(--s2)"></span>Qwen 학습 전</span><span><span class="sw" style="background:var(--s1)"></span>Claude Haiku</span></div>
+  <div class="bars">
+    <div class="row"><div class="k"><b>search</b> 검색 <span style="color:var(--muted)">· 7건</span></div><div class="track"><div class="lane"><div class="fill" style="width:0%;background:var(--s2)"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="7/7"></div></div></div><div class="vals"><span>0 / 7</span><span>7 / 7</span></div></div>
+    <div class="row"><div class="k"><b>write</b> 쓰기·단계변경 <span style="color:var(--muted)">· 5건</span></div><div class="track"><div class="lane"><div class="fill" style="width:20%;background:var(--s2)" title="1/5"></div></div><div class="lane"><div class="fill" style="width:0%;background:var(--s1)"></div></div></div><div class="vals"><span>1 / 5</span><span>0 / 5 †</span></div></div>
+    <div class="row"><div class="k"><b>scheduling</b> 일정 <span style="color:var(--muted)">· 2건</span></div><div class="track"><div class="lane"><div class="fill" style="width:0%;background:var(--s2)"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="2/2"></div></div></div><div class="vals"><span>0 / 2</span><span>2 / 2</span></div></div>
+    <div class="row"><div class="k"><b>multi_turn</b> 다중턴 <span style="color:var(--muted)">· 2건</span></div><div class="track"><div class="lane"><div class="fill" style="width:0%;background:var(--s2)"></div></div><div class="lane"><div class="fill" style="width:0%;background:var(--s1)"></div></div></div><div class="vals"><span>0 / 2</span><span>0 / 2</span></div></div>
+    <div class="row"><div class="k"><b>hallucination</b> 환각 방지 <span style="color:var(--muted)">· 1건</span></div><div class="track"><div class="lane"><div class="fill" style="width:0%;background:var(--s2)"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="1/1"></div></div></div><div class="vals"><span>0 / 1</span><span>1 / 1</span></div></div>
+    <div class="row"><div class="k"><b>detail</b> 상세조회 <span style="color:var(--muted)">· 1건</span></div><div class="track"><div class="lane"><div class="fill" style="width:0%;background:var(--s2)"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="1/1"></div></div></div><div class="vals"><span>0 / 1</span><span>1 / 1</span></div></div>
+    <div class="row"><div class="k"><b>interview</b> 면접 안내 <span style="color:var(--muted)">· 2건</span></div><div class="track"><div class="lane"><div class="fill" style="width:100%;background:var(--s2)" title="2/2"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="2/2"></div></div></div><div class="vals"><span>2 / 2</span><span>2 / 2</span></div></div>
+    <div class="row"><div class="k"><b>company·refuse·findings</b> <span style="color:var(--muted)">· 3건</span></div><div class="track"><div class="lane"><div class="fill" style="width:100%;background:var(--s2)" title="3/3"></div></div><div class="lane"><div class="fill" style="width:100%;background:var(--s1)" title="3/3"></div></div></div><div class="vals"><span>3 / 3</span><span>3 / 3</span></div></div>
+  </div>
+  <div class="note">† <b>Claude write 0/5 는 단일턴 채점의 한계.</b> Claude는 대상을 먼저 <code>search</code>로 찾고 <b>확인 턴을 기다리는</b> 안전한 순서를 택해, 한 턴 안에 <code>change_stage</code>를 내지 않아 미완료로 잡혔다. 실사용(다중턴)에선 정상 동작이고, 오히려 "부탁 안 한 쓰기 도구를 지어내지 않았다"는 안전 신호다.<br>
+  반대로 학습 전 Qwen은 <b>거절·경계(company·refuse)와 면접 안내는 만점</b> — 채용 밖 질문을 거절하고 개인정보를 안 내는 판단력은 처음부터 있었다.</div>
+</div>
+
+<!-- 4. 실패의 질 -->
+<h2><span class="n">4</span>품질 분해 ③ — 실패의 "질" (안전한 실패 vs 진짜 실수)</h2>
+<div class="card">
+  <p class="sub">틀린 건수보다 <b>어떻게 틀렸나</b>가 운영 리스크를 결정한다. 상태 색은 아이콘·라벨과 함께 쓴다.</p>
+
+  <div style="margin:14px 0 4px;font-size:13.5px"><b>Qwen v9</b> · 실패 6건 (17/23 통과)</div>
+  <div class="seg"><i style="flex:5;background:var(--good)" title="UX상 정상 5건"></i><i style="flex:1;background:var(--critical)" title="진짜 실수 1건"></i></div>
+  <div class="segl"><span><span class="ic" style="color:var(--good)">✓</span>UX상 정상 5건 — 확인 문구 통과·안전한 다단계 진행(채점기만 미완료로 봄)</span><span><span class="ic" style="color:var(--critical)">✕</span>진짜 실수 1건 — <code>list_postings</code> 오선택</span></div>
+  <p class="sub" style="margin-top:8px">→ 실질 정확도 <b>~95%+</b>. 지어낸 쓰기 도구(hallucinated write) <b>0건</b>.</p>
+
+  <div style="margin:18px 0 4px;font-size:13.5px"><b>Claude Haiku</b> · 실패 7건 (16/23 통과)</div>
+  <div class="seg"><i style="flex:5;background:var(--good)" title="안전한 순서(검색→확인 대기) 5건"></i><i style="flex:2;background:var(--serious)" title="다중턴 맥락 미반영 2건"></i></div>
+  <div class="segl"><span><span class="ic" style="color:var(--good)">✓</span>안전한 순서 5건 — 대상 검색 후 확인 대기(write 유형)</span><span><span class="ic" style="color:var(--serious)">!</span>다중턴 맥락 미반영 2건 — 앞 턴의 대상을 이어받지 못함</span></div>
+  <p class="sub" style="margin-top:8px">→ 위험한 실패(임의 실행·지어낸 도구) <b>0건</b>. no-tool 위반 1건은 "확인만 요청한 상황에 검색을 한 번 더 한" 과잉 조회.</p>
+
+  <div style="margin:18px 0 4px;font-size:13.5px"><b>Qwen 학습 전</b> · 실패 17건 (6/23 통과)</div>
+  <div class="seg"><i style="flex:17;background:var(--serious)" title="도구 미호출 17건"></i></div>
+  <div class="segl"><span><span class="ic" style="color:var(--serious)">!</span>도구 미호출 17건 — 추론은 맞으나 <code>&lt;tool_call&gt;</code> 포맷을 내지 못함 (포맷 실패, 판단 실패 아님)</span></div>
+  <p class="sub" style="margin-top:8px">→ 임의 실행·환각 도구 <b>0건</b>. 실패가 전부 "안 함"이라 데이터 훼손 위험은 없었다 — 다만 쓸 수 없는 수준.</p>
+</div>
+
+<!-- 5. 요약 어댑터 품질 -->
+<h2><span class="n">5</span>품질 분해 ④ — 서류 요약 어댑터 (정성 품질)</h2>
+<div class="card">
+  <p class="sub">도구 호출과 별개로, 서류 요약 전용 어댑터(<code>qwen3-arda-summary</code>)의 출력 품질을 항목별로 봤다.</p>
+  <table>
+    <tr><th>항목</th><th>Qwen summary 어댑터</th><th>Claude Haiku (v2 체인)</th></tr>
+    <tr><td>JSON 형식 준수</td><td class="ok">✓ 완벽 (파싱 실패 0)</td><td class="ok">✓ (파싱 폴백 있음)</td></tr>
+    <tr><td>gist(요지) 정확성</td><td class="ok">✓ 정확</td><td class="ok">✓ 정확</td></tr>
+    <tr><td>key_skills 추출</td><td class="ok">✓ 정확</td><td class="ok">✓ 정확</td></tr>
+    <tr><td>career_years(경력 연수)</td><td class="bad">✕ 오차 — 정답 3년을 5년으로 (인턴 기간 포함)</td><td class="ok">✓ (v2 스키마로 채움)</td></tr>
+    <tr><td>예시 숫자 베끼기</td><td class="bad">✕ 소형모델 특성 — 프롬프트 예시 70/40/60 을 그대로 냄 (→ v3 프롬프트로 예시 제거해 해결)</td><td class="ok">✓ 안 베낌</td></tr>
+    <tr><td>문자열 내 따옴표 깨짐</td><td class="bad">✕ 발생 (→ 파서 복구 폴백 추가로 56/56 성공)</td><td class="ok">✓ 없음</td></tr>
+  </table>
+  <div class="note"><b>해석:</b> 요약 어댑터는 "형식·요지·역량"은 Claude 수준이지만, <b>수치 추론(경력 연수)·프롬프트 예시 분리</b>에서 소형모델 한계가 드러났다. 이 두 결함은 프롬프트(v3)·파서 폴백으로 우회했지만, 매번 땜질이 필요한 성격이라 심사 서빙을 Claude로 확정한 근거 중 하나다.</div>
+</div>
+
+<!-- 6. 비용 -->
+<h2><span class="n">6</span>비용</h2>
+<div class="card">
+  <div class="tiles" style="margin-bottom:12px">
+    <div class="tile"><div class="lab"><span class="sw" style="background:var(--s1)"></span>Claude · eval 1건당</div><div class="val">$0.0139</div><div class="d">23건 $0.3199 · in 307,497 / out 2,480 tok</div></div>
+    <div class="tile"><div class="lab"><span class="sw" style="background:var(--s1)"></span>Claude · 실사용 1호출당</div><div class="val">$0.0075</div><div class="d">아르 로그 23건 누적 $0.1714</div></div>
+    <div class="tile"><div class="lab"><span class="sw" style="background:var(--s3)"></span>Qwen · 1호출당</div><div class="val">$0<small>+GPU</small></div><div class="d">GPU 상시 $0.71/h · 손익분기 ≈ 하루 51면접</div></div>
+  </div>
+  <table>
+    <tr><th>항목</th><th>Claude API</th><th>Qwen 자체 서빙</th></tr>
+    <tr><td>과금 구조</td><td>사용량(토큰)만 · 고정비 0</td><td>호출당 0 · GPU 고정비 $0.71/h(+EBS $0.014/h)</td></tr>
+    <tr><td>기본·경계 질문</td><td class="ok">캔드 응답 $0 (FAQ)</td><td>—</td></tr>
+    <tr><td>STT</td><td colspan="2">OpenAI <code>whisper-1</code> $0.006/min ≈ $0.06/면접 (클라우드 서빙 기본 경로)</td></tr>
+  </table>
+  <p class="sub">※ eval 1건($0.0139)이 실사용($0.0075)보다 비싼 이유: eval은 전체 시스템 프롬프트를 매 건 포함(입력 13.4K tok/건). 실사용은 캐시·짧은 대화로 더 싸다.</p>
+</div>
+
+<!-- 7. 속도 -->
+<h2><span class="n">7</span>속도 · 지연 (자체 서빙 실측)</h2>
+<div class="card">
+  <table>
+    <tr><th>구성</th><th>지표</th><th class="num">실측</th></tr>
+    <tr><td>Qwen chat (Ollama Q4_K_M · T4)</td><td>생성 속도 · TTFT · 콜드 스타트</td><td class="num">39.5 tok/s · ~40ms · <b>78초</b></td></tr>
+    <tr><td>Qwen 10회 벤치</td><td>92 tok → 1,024 tok</td><td class="num">2.3s → 26.4s</td></tr>
+    <tr><td>STT (GPU · faster-whisper large-v3-turbo fp16)</td><td>3초 음성 전사</td><td class="num">275ms</td></tr>
+    <tr><td>표정 ViT (GPU fp16 · VRAM 178MB)</td><td>crop 1장</td><td class="num">75ms</td></tr>
+    <tr><td>Claude API</td><td>응답 지연</td><td class="num" style="color:var(--muted)">이 데이터셋엔 미측정</td></tr>
+  </table>
+  <div class="note"><b>운영 관점:</b> Qwen의 <b>콜드 스타트 78초</b>와 긴 응답(1K tok = 26초)은 공채 시즌 동시 접속에서 대기줄을 만든다(부하테스트: 8명 동시 시 STT 대기 15→42초). Claude는 오토스케일로 이 부류 문제가 없다 — 정확도 격차보다 <b>이 안정성 차이</b>가 클라우드 확정의 더 큰 이유다.</div>
+</div>
+
+<!-- 8. STT 품질 -->
+<h2><span class="n">8</span>음성 전사(STT) 품질 이슈 — 둘 다 겪은 것</h2>
+<div class="card">
+  <table>
+    <tr><th>이슈</th><th>OpenAI whisper-1 (API)</th><th>faster-whisper (로컬)</th></tr>
+    <tr><td>무음·잡음에 말 지어냄(hallucination)</td><td class="bad">✕ 발생 — 유튜브 자막 문구가 답변으로 저장된 사고(09-15)</td><td class="bad">✕ 발생 — 무음 3초가 "감사합니다."로</td></tr>
+    <tr><td>완화 조치</td><td class="ok">✓ <code>no_speech_prob</code> ≥ 0.6 조각 폐기</td><td class="ok">✓ VAD 필터 + 이전 문맥 미참조</td></tr>
+    <tr><td>실시간 예산(1.5초) 준수</td><td class="ok">✓ API 응답</td><td class="bad">✕ CPU(t3.large)에서 44초 발화 → 180초 초과 · 연쇄 지연</td></tr>
+  </table>
+  <p class="sub">전사 정확도 자체는 두 엔진 비슷(재현 클라이언트 12/12 정확). 차이는 <b>지연과 무음 처리</b>였고, 클라우드는 API + 게이트로 정리했다.</p>
+</div>
+
+<!-- 9. 해석 주의 -->
+<h2><span class="n">9</span>해석 주의 — 숫자를 과신하지 않기 위해</h2>
+<div class="card">
+  <ul style="margin:0;padding-left:20px;font-size:14px;color:var(--ink2)">
+    <li><b>채점기 편향:</b> 테스트셋·<code>judge.py</code>는 원래 Qwen 학습(gold) 기준으로 만들어져 약간 Qwen 친화적이다. 절대 점수보다 <b>같은 자·같은 편향으로 잰 상대 궤적</b>(26.1 → 69.6 → 73.9)이 유효한 지표다.</li>
+    <li><b>표본 크기:</b> 23건은 방향을 보기엔 충분하지만 1~2건 차이(예: 69.6 vs 73.9)는 통계적으로 유의하다고 말하기 어렵다. "v9가 Claude와 <b>동급</b>"이 정직한 표현이다.</li>
+    <li><b>단일턴 채점:</b> 다중턴 확인 흐름(검색→확인→실행)을 한 턴에 평가해 Claude write 5건이 저평가됐다.</li>
+    <li><b>v9 항목별 원자료</b>는 보존되지 않아 총점과 실패 분류만 있다.</li>
+  </ul>
+</div>
+
+<div class="concl"><b>정리</b> — 정확도는 v9가 Claude와 동급(73.9 vs 69.6)까지 올라왔고, 실패의 질도 둘 다 "위험한 실패 0건"으로 안전하다. 갈린 곳은 <b>수치 추론·형식 안정성(요약 어댑터)</b>과 <b>지연·동시성(콜드 78초·대기줄)</b>이며, 이것이 심사 서빙을 클라우드+Claude로 확정한 이유다. Qwen 자체학습은 "public API 없이도 갈 수 있는가"에 실측으로 답한 <b>비용 절감 R&amp;D 자산</b>으로 남는다.</div>
+
+<footer>Team Seuk · Arda — 2026-09-22 · 출처: <code>ai/qwen-training</code>(judge·eval) · 09-11 로컬 Qwen eval · 09-12 Claude Haiku eval(<code>eval_anthropic.py</code>) · 09-17 v9·GPU 벤치 · 비용비교 데이터(JSON 4세그먼트). 팔레트: 검증된 기본 카테고리 3슬롯(파랑·주황·아쿠아, 전 쌍 CVD ΔE ≥ 9) · 상태색은 아이콘+라벨 동반.</footer>
+</div>
+</body>
+</html>

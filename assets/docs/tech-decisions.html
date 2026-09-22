@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[팀 공유] 우리가 쓰는 기술과 고른 이유 — 정리본</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#fff; --ink:#1b2530; --muted:#5c6875; --line:#e3e8ee;
+    --accent:#2f6fed; --accent-soft:#eaf1fe; --good:#1e8e5a; --amber:#b7791f;
+    --amber-soft:#fdf3e2; --bad:#c0392b; --mono:"SFMono-Regular",Consolas,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--bg); color:var(--ink); line-height:1.75; font-size:15px;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;}
+  .wrap{max-width:920px; margin:0 auto; padding:0 20px 80px}
+  header.top{background:linear-gradient(135deg,#0f2a44,#1c5a72); color:#fff; padding:40px 20px 32px; margin-bottom:26px}
+  header.top .inner{max-width:920px; margin:0 auto}
+  .tag{display:inline-block; font-size:12px; letter-spacing:.06em; text-transform:uppercase;
+    background:rgba(255,255,255,.16); padding:4px 10px; border-radius:20px; margin-bottom:12px}
+  header.top h1{margin:0 0 10px; font-size:24px; line-height:1.35}
+  header.top .by{margin:0; color:#cfe0ef; font-size:13.5px}
+  header.top .by code{background:rgba(255,255,255,.14); color:#eaf4ff; padding:1px 6px; border-radius:4px}
+  header.top a{color:#9fd0ff}
+  h2{font-size:19px; margin:36px 0 12px; padding-bottom:8px; border-bottom:2px solid var(--line)}
+  h2 .n{color:var(--accent); margin-right:8px}
+  h3{font-size:15.5px; margin:20px 0 6px; color:#243244}
+  p{margin:10px 0}
+  a{color:var(--accent)}
+  code{font-family:var(--mono); font-size:.87em; background:#eef1f5; padding:1px 5px; border-radius:4px; color:#37424f}
+  ul,ol{margin:8px 0; padding-left:22px} li{margin:5px 0}
+  strong{color:#12203a}
+  .lead{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:12px 16px; margin:14px 0}
+  table{width:100%; border-collapse:collapse; margin:14px 0; font-size:13.8px; background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{background:#eef2f7; font-weight:700; color:#33404f; font-size:12.8px}
+  tr:last-child td{border-bottom:none}
+  td:first-child{font-weight:600; color:#2a3441}
+  .kv td:first-child{white-space:nowrap; color:var(--muted)}
+  .warn{background:var(--amber-soft); border-left:4px solid var(--amber); border-radius:8px; padding:11px 15px; margin:12px 0; font-size:13.8px}
+  .badge{display:inline-block; font-size:11.5px; font-weight:700; padding:1px 8px; border-radius:20px; background:var(--amber-soft); color:var(--amber)}
+  hr{border:none; border-top:1px solid var(--line); margin:26px 0}
+  footer{margin-top:36px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:12.8px}
+  footer code{font-size:.9em}
+</style>
+</head>
+<body>
+<header class="top"><div class="inner">
+  <span class="tag">팀 공유 · Tech Decisions</span>
+  <h1>우리가 쓰는 기술과 그것을 고른 이유 — 정리본</h1>
+  <p class="by">2026-09-18 · 우정(백엔드) · 저장소 <code>Seuk-Team/Arda</code> 커밋 <code>4747567</code> 기준<br>
+  보고서(그림·표 포함): <a href="https://claude.ai/artifact/Ai6YBFXz52VvyP9xH8vhgN">claude.ai/artifact/Ai6YBFXz52VvyP9xH8vhgN</a></p>
+</div></header>
+
+<div class="wrap">
+
+  <div class="lead">
+    <b>두 줄 요약</b>
+    <ul style="margin:8px 0 0">
+      <li><b>한 것</b>: 스택·API·코드 구조를 한 편으로 정리했다. 목록이 아니라 <b>왜 그것을 골랐는가</b>와 <b>어떤 결정이 뒤집혔는가</b>가 중심이다 — 지금 구조는 26일 동안 여러 번 고쳐 쓰인 결과다.</li>
+      <li><b>정리하다 발견한 것</b>: 문서와 코드가 어긋난 곳이 넷 있다(§6). 그중 <b>ADR-0011(에이전트 모델)</b> 은 에이전트 오너 확인이 필요하다.</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">1.</span>지금의 크기</h2>
+  <table class="kv">
+    <tr><td>DB 테이블</td><td>28</td></tr>
+    <tr><td>alembic 리비전</td><td>26</td></tr>
+    <tr><td>API 라우트</td><td>107</td></tr>
+    <tr><td>백엔드 시험</td><td>1,165 통과 (커밋 <code>a650123</code> 기준)</td></tr>
+    <tr><td>결정 기록(ADR)</td><td>36편</td></tr>
+    <tr><td>AI 프롬프트</td><td>18개</td></tr>
+  </table>
+  <p>백엔드 파이썬 134개 파일 중 51개가 시험 파일이다. 프론트 TS/TSX 62개, Flutter Dart 86개.</p>
+
+  <h2><span class="n">2.</span>스택 — 한 줄로 왜</h2>
+  <table>
+    <tr><th>영역</th><th>선택</th><th>고른 이유</th></tr>
+    <tr><td>백엔드</td><td>FastAPI · Python 3.12</td><td>타입 힌트가 그대로 검증·문서가 된다. 클라이언트가 셋(웹·앱·공개 링크)이라 Swagger 가 계약의 진실인 구조가 값을 했다</td></tr>
+    <tr><td>DB</td><td>PostgreSQL 16 + <b>pgvector</b></td><td>벡터 DB 를 따로 세우지 않기 위해서다(ADR-0021). 검색 대상이 이미 Postgres 안의 지원서인데 저장소를 나누면 동기화 문제가 새로 생긴다</td></tr>
+    <tr><td>스키마 이행</td><td>alembic (26 리비전)</td><td>손 SQL 시절에는 <code>git pull</code> 로 DB 가 안 따라와 "내 로컬에서만 되는" 상태가 반복됐다. 지금은 한 줄로 따라온다</td></tr>
+    <tr><td>프론트</td><td>React 19 · Vite · TS</td><td>팀이 이미 쓸 줄 안다는 것이 근거였다(ADR-0006). 상태 관리 라이브러리 없음, 스타일은 CSS Modules + 토큰</td></tr>
+    <tr><td>앱</td><td>Flutter · Dart (Android)</td><td>같은 API 의 두 번째 클라이언트를 만들어 "서버를 몇 줄 고쳤나"를 말하기 위해서다(ADR-0010). <b>iOS 동작은 주장하지 않는다</b> — Mac 이 없어 검증할 수 없다</td></tr>
+    <tr><td>AI</td><td>Claude API (프롬프트 18개)</td><td>요약을 한 번에 시키지 않고 <b>3단계 체인</b>으로 쪼갰다(ADR-0022). 한 프롬프트가 여섯 가지를 하면 어디서 틀렸는지 알 수 없다</td></tr>
+    <tr><td>실시간 전사</td><td>OpenAI 전사 API</td><td>09-15 실측 — t3.large 에서 로컬 <code>large-v3-turbo</code> 가 <b>44초 발화를 180초 안에 못 끝냈고</b> 밀린 시간이 뒤 답변까지 연쇄로 죽였다. API 는 분당 $0.006, 10문항 면접 ≈ $0.06 (ADR-0038)</td></tr>
+    <tr><td>표정·음성 판정</td><td>ViT + 음성 특징 (<code>ai/lie-detection</code>)</td><td>오디오를 <b>16kHz PCM</b> 으로 받는다 — webm/opus 는 발화 끝을 알려면 매번 디코딩해야 하고 그게 실시간 예산 1.5초를 갉아먹는다</td></tr>
+    <tr><td>메일</td><td>n8n + SMTP</td><td>메일이 SQS·SES·워커 코드에 묶여 있으면 AWS 를 떠날 때 같이 멈춘다. 본문은 우리가 만들고 <b>부치는 일만</b> 맡겨 노드 하나로 공급자가 바뀌게 했다(ADR-0030)</td></tr>
+    <tr><td>인프라</td><td>EC2 1대 · Caddy · docker compose</td><td>K8s 는 뺐다(ADR-0001) — 한 달 규모에서 "굴렸다"고 말할 깊이까지 못 간다</td></tr>
+    <tr><td>CI</td><td>GitHub Actions</td><td>ruff(F) → alembic → 스키마 드리프트 → pytest → 프론트 빌드 → AI·앱 시험</td></tr>
+  </table>
+  <p><b>뺀 것</b>: Kubernetes · 실시간 공동 편집(CRDT·OT) · 3인 이상 다자 화상면접 · SQS 워커(코드는 남김, ADR-0036).</p>
+
+  <h2><span class="n">3.</span>API 의 모양</h2>
+  <p>접두사 <code>/api/v1</code>. 요청·응답의 진실은 Swagger(<code>/docs</code>) 이고, <code>02-api.md</code> 는 "무엇이 있는가"만 유지한다.</p>
+  <h3>출입구 세 가지</h3>
+  <table>
+    <tr><th>출입구</th><th>누가</th><th>어떻게</th></tr>
+    <tr><td>JWT Bearer</td><td>담당자·면접관</td><td>12시간 토큰. <b>비활성 계정은 이미 발급된 토큰도 401</b> — 로그인만 막으면 만료까지 그대로 쓴다</td></tr>
+    <tr><td><code>/public/*</code></td><td>지원자</td><td>링크 안의 일회성 토큰. 지원 폼·일정 선택·인적성 설문·AI 면접이 전부 같은 패턴</td></tr>
+    <tr><td><code>/internal/*</code></td><td>판정 워커·n8n</td><td>서비스 토큰. 없으면 아예 호출하지 않는다</td></tr>
+  </table>
+  <p><b>권한은 <code>admin</code>·<code>member</code> 둘뿐이다</b>(ADR-0017). 위계가 아니라 조작 권한의 유무다.</p>
+  <ul>
+    <li>admin 전용은 넷: 면접관 배정·해제 / 계정 생성 / 메일 템플릿 / <b>남의</b> 가용 시간</li>
+    <li>member 제한은 하나: 평가 <b>작성</b>은 배정된 건만</li>
+    <li>조회는 로그인만 하면 전부 허용 — 옛 "면접관은 배정된 지원서만" 규칙은 폐지됐다</li>
+  </ul>
+  <h3>되풀이되는 설계 규칙</h3>
+  <table>
+    <tr><th>규칙</th><th>왜</th></tr>
+    <tr><td>마감·만료는 <b>조회 시점에 판정</b></td><td>크론을 늘리면 "그게 돌았나"를 확인할 자리가 또 생긴다</td></tr>
+    <tr><td>일괄 변경은 전부 성공 아니면 전체 롤백(409)</td><td>200명 중 30명만 바뀌면 담당자가 무엇이 됐는지 알 수 없다</td></tr>
+    <tr><td>사용자는 지우지 않는다(비활성화만)</td><td><code>users.id</code> 가 <code>changed_by</code>·<code>evaluator_id</code> 로 박혀 있어 물리 삭제가 이력을 부순다</td></tr>
+    <tr><td>불합격은 <code>reason</code> 없으면 422</td><td>사유 없는 이력은 나중에 아무도 설명할 수 없다</td></tr>
+    <tr><td>단계 역행은 항상 허용, 전진은 한 칸씩</td><td>사람이 AI 판정을 되돌리는 것이 유일한 안전장치다</td></tr>
+  </table>
+
+  <h2><span class="n">4.</span>코드 구조 — Bounded Context 넷 (ADR-0035)</h2>
+  <p>09-12 폴더 재편의 출발점은 단순했다. <b><code>models.py</code> 하나를 71개 파일이 직접 참조</b>하고 있어 무엇을 고쳐도 어디가 깨질지 몰랐다.</p>
+  <p>"하나의 중심"을 잡으려 했으나 Arda 에는 자연스러운 중심이 <b>넷</b> 있었다. 하나로 몰면 나머지 셋이 왜곡되므로 각자의 별로 뒀다.</p>
+  <table>
+    <tr><th>컨텍스트</th><th>중심</th><th>안에 있는 것</th></tr>
+    <tr><td><code>hiring</code></td><td>JobPosting</td><td>공고 · 회사 프로필 · 자동 심사 규칙</td></tr>
+    <tr><td><code>talent</code></td><td>User</td><td>계정 · 인증 · 지원자 앱 로그인</td></tr>
+    <tr><td><code>application</code></td><td>Application</td><td>가장 큰 별 — 서류 점수 · 단계 이력 · 판정 · 메일 기록 · 에이전트 추적</td></tr>
+    <tr><td><code>interview</code></td><td>InterviewSession</td><td>면접 세션 · 일정 · 배정 · 실시간 분석 · 채점</td></tr>
+  </table>
+  <p>바깥으로 나가는 것은 <b>포트와 어댑터</b>로 갈랐다 — <code>ports/output/*_port.py</code> 가 약속, <code>adapter/outbound/{pg,llm,mail}</code> 이 구현이다. 메일 발송기가 <code>n8n</code>·<code>smtp</code>·<code>sqs</code> 세 벌인데 부르는 쪽 코드가 하나인 것이 이 구조 덕이다.</p>
+
+  <h2><span class="n">5.</span>지금의 제품을 만든 것은 개정이다</h2>
+  <p>ADR 은 "확정"으로 끝나지 않는다. 오너가 개정 ADR 을 쓰면 바뀐다. 아래 넷이 모양을 가장 크게 바꿨다.</p>
+
+  <h3>① 표정분석: 제외 → 도입 (ADR-0002 → 0029, 09-07)</h3>
+  <p>원래 뺐던 근거는 강했다 — HireVue 가 2021년 중단(직무성과 예측 기여도 0.25% 미만), 얼굴 움직임으로 감정 추론이 어렵다는 학계 정리, 안면마비·자폐 지원자를 결함으로 점수화하는 차별 위험. 뒤집으면서 <b>그 근거를 폐기하지 않고 문서에 남겼다.</b> 지금의 타협은 표정·음성 수치가 담당자 화면에 보이되 <b>점수 재료가 아니라는 것</b>이다. AI 요약 문장도 측정된 숫자의 재서술만 허용하고, 수치에 없는 숫자나 사람을 단정하는 단어가 나오면 문장을 버리고 고정 틀로 대체한다.</p>
+
+  <h3>② AI 판정: 추천까지만 → 단계는 AI, 최종만 사람 (ADR-0003 → 0034, 09-10)</h3>
+  <p>"확정은 사람"이 <b>최종 합불 한 곳</b>으로 좁혀졌다. 서류는 아르가 100점으로 채점해 임계(기본 60) 이상이면 면접으로, 미만이면 탈락으로 옮긴다. 붙인 안전장치 셋:</p>
+  <ol>
+    <li>이력에 <code>changed_by=NULL</code>(시스템)과 점수 사유가 남는다</li>
+    <li>불합격 메일은 즉시 안 나가고 마감 뒤 담당자가 일괄 발행한다(번복 여지)</li>
+    <li><b>사람이 한 번 손대면 그 지원자는 이후 자동 판정에서 빠진다 — 수동이 항상 이긴다</b></li>
+  </ol>
+
+  <h3>③ AWS: 8종 → 3종 (ADR-0031·0036)</h3>
+  <p>예산 $400 과 10/27 종료가 전제였다. 핵심은 지우는 것이 아니라 <b>스위치를 먼저 만든 것</b>이다 — <code>MAIL_DISPATCH</code> · <code>MAIL_TRANSPORT</code> · <code>QUEUE_BACKEND</code> · <code>S3_ENDPOINT_URL</code>. S3 는 코드를 안 고치고 MinIO 로 갈 수 있다.</p>
+
+  <h3>④ 실시간 화상면접: 제외 → 1:1 만 도입</h3>
+  <p>기획 견적 "시그널링 + TURN + <b>SFU</b> 까지 1명의 4주"는 <b>3인 이상이 전제</b>였다. 둘이면 SFU 가 없어 두 끝점이 직접 붙는다. 전제를 다시 읽고 1:1 만 열었다. 3인 이상은 09-20 시연 뒤 집단 면접으로 다시 본다.</p>
+
+  <h2><span class="n">6.</span>어긋나 있는 것 — 확인 부탁드립니다</h2>
+  <p>정리하면서 확인한, 문서와 코드가 맞지 않는 곳이다. 숨기면 발표에서 먼저 지적당한다.</p>
+  <table>
+    <tr><th>무엇</th><th>문서</th><th>실제</th><th>누가</th></tr>
+    <tr><td><b>에이전트 모델</b></td><td>ADR-0011 — 도구 호출은 <code>claude-opus-5</code>, "여기서 아끼면 발표가 깨진다"</td><td>코드 기본값은 채팅·요약 <b>둘 다 <code>claude-haiku-4-5</code></b> (<code>anthropic_backend.py</code>). 09-02 키 폐기 뒤 비용을 조인 흔적으로 보이는데 ADR 이 안 따라왔다</td><td><span class="badge">cloverky 확인 요청</span></td></tr>
+    <tr><td>API 프로세스</td><td>—</td><td><code>--workers 1</code> 고정. 면접 방·입장권·로그인 잠금·STT 모델이 전부 프로세스 메모리라 늘리면 지원자와 담당자가 다른 프로세스에 앉는다</td><td>woojeongalex (Redis 이관은 프리즈 뒤)</td></tr>
+    <tr><td>ADR-0012 서류심사 기준</td><td>체크박스가 전부 미확정</td><td>실제 기준은 ADR-0034 가 대신 정했다. 0012 가 정리되지 않은 채 남아 있다</td><td>정리 필요</td></tr>
+    <tr><td>면접관 자동 배정</td><td>서류 통과 시 공고의 기본 면접관 풀에서 배정</td><td>배정 0명으로 떨어지는 경우가 있다</td><td>woojeongalex (미수정)</td></tr>
+  </table>
+
+  <h2><span class="n">7.</span>사고가 남긴 장치</h2>
+  <p>지금 코드의 장치 대부분은 설계가 아니라 사고의 흔적이다.</p>
+  <table>
+    <tr><th>언제</th><th>무슨 일</th><th>그 뒤 생긴 것</th></tr>
+    <tr><td>09-01</td><td>깨진 main 을 하루에 두 번, 둘 다 <b>우연히</b> 발견</td><td>CI 도입 — 게이트가 아니라 "깨졌다는 사실만 즉시 보이게"</td></tr>
+    <tr><td>09-01</td><td>디스크 고갈로 배포가 죽음</td><td>컨테이너 로그 상한(20MB×3) · 배포 때 이미지·캐시 prune</td></tr>
+    <tr><td>09-02</td><td>Docker 가 죽어 pytest 가 <b>24분간 조용히</b> 멈춤</td><td><code>pytest-timeout 60초</code> — 멈춤을 침묵이 아니라 실패로</td></tr>
+    <tr><td>09-09</td><td>STT 컨테이너 OOM, 메모리 상향 5번 + 인스턴스 이관까지 감</td><td>근본 원인은 코드 기본값 하나(<code>int8</code>). 고친 뒤 사용량 223MB</td></tr>
+    <tr><td>09-09</td><td>compose 를 <code>infra/</code> 로 옮기자 컨테이너·볼륨이 <b>한 벌 더</b> 생김</td><td><code>name: arda</code> 를 박음 (compose 는 이름이 없으면 폴더명을 쓴다)</td></tr>
+    <tr><td>09-12</td><td>미정의 이름 두 건이 프로덕션 500 으로</td><td>CI 에 <code>ruff --select F</code> — 1초에 잡힌다</td></tr>
+    <tr><td>09-16</td><td>n8n 이 받고 죽어 메일이 <code>queued</code> 로 남음</td><td>API 가 5분마다 밀린 메일을 SMTP 로 재발송(최대 3회)</td></tr>
+    <tr><td>09-17</td><td>면접 링크를 만들자마자 시작하면 422</td><td>기본 질문 3개를 세션과 <b>같은 커밋</b>에 넣고, 맞춤 질문은 시작 전일 때만 교체</td></tr>
+  </table>
+
+  <h2><span class="n">8.</span>남은 일</h2>
+  <table>
+    <tr><th>상태</th><th>무엇</th><th>왜</th><th>누가</th></tr>
+    <tr><td>부분</td><td>면접관 자동 배정 0명 결함</td><td>서류 통과자가 면접관 없이 면접 단계로 간다</td><td>woojeongalex</td></tr>
+    <tr><td>계획</td><td>AWS 잔여 5종 폐기 · CloudFormation 스택 삭제</td><td>10/27 이후에도 서비스가 이어 돌아야 한다</td><td>suvisdev</td></tr>
+    <tr><td>계획</td><td>방 상태 Redis 이관 — 워커 1개 제약 해제</td><td>지금은 API 를 수평으로 못 늘린다</td><td>woojeongalex</td></tr>
+    <tr><td>계획</td><td>집단 면접(지원자 여러 명 + 면접관 1명) ADR</td><td>09-20 시연 뒤 착수. 핵심은 AI 판정을 사람별로 가르는 것</td><td>woojeongalex</td></tr>
+    <tr><td>부분</td><td>받아쓰기 정확도 — 실제 음성에서 흔들림</td><td>시연에서 첫 질문 답변이 깨져 나왔다</td><td>woojeongalex · suvisdev</td></tr>
+    <tr><td>계획</td><td>ADR-0011 을 코드 실제값에 맞춰 개정</td><td>문서가 코드와 다르면 둘 다 못 믿는다</td><td>cloverky</td></tr>
+    <tr><td>계획</td><td>DB 권한 분리 (09-22 09:00)</td><td>앱 전용 롤로 낮추기 — 6단계 점검 예정</td><td>suvisdev · woojeongalex(점검)</td></tr>
+  </table>
+
+  <footer>
+    <b>근거</b> · 2026-09-18 조회, 커밋 <code>4747567</code> 기준.
+    <ul>
+      <li>문서: <code>docs/00_overview/</code> 00·01·02·03·04·05·07 · <code>docs/03_decision/</code> ADR-0001·0002·0003·0005·0006·0010·0011·0014·0017·0021·0022·0025·0026·0028·0029·0030·0031·0034·0035·0036·0038</li>
+      <li>코드: <code>backend/pyproject.toml</code> · <code>backend/app/</code>(models·ports·adapter·agent) · <code>frontend/app/package.json</code> · <code>mobile/pubspec.yaml</code> · <code>ai/lie-detection/interview_ws.py</code> · <code>infra/docker-compose.prod.yml</code> · <code>.github/workflows/ci.yml</code> · <code>backend/.env.example</code></li>
+      <li>수치: 테이블 28 · alembic 26 · 라우트 107 · 프롬프트 18 · ADR 36편은 저장소를 직접 센 값. 시험 1,165 통과는 커밋 <code>a650123</code> 메시지 기준이며 이후 커밋에서 늘었을 수 있다</li>
+    </ul>
+  </footer>
+</div>
+</body>
+</html>

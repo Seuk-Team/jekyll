@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>fit-check 자동 판정 · 정확성 분석 · 2026-09-17</title>
+<style>
+:root {
+  --bg-0: #0a0d13;
+  --bg-1: #12161f;
+  --bg-2: #1a1f2b;
+  --bg-3: #232937;
+  --text: #e6e8ea;
+  --text-dim: #a8b0be;
+  --text-mute: #6b7484;
+  --border: #2a3140;
+  --cyan: #22d3ee;
+  --violet: #a78bfa;
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --red: #f87171;
+  --font: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg-0); color: var(--text); font-family: var(--font); font-size: 14px; line-height: 1.6; }
+main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 100px; }
+
+header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 32px; }
+.title { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+.subtitle { color: var(--text-dim); margin-top: 6px; }
+.timestamp { color: var(--cyan); font-family: var(--mono); font-size: 12px; }
+
+h2 { font-size: 20px; margin: 36px 0 14px; padding-bottom: 6px; border-bottom: 1px solid var(--border); font-weight: 700; }
+h3 { font-size: 15px; margin: 20px 0 8px; color: var(--text-dim); font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; }
+
+.card { background: var(--bg-1); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin: 12px 0; }
+.card.warn { border-left: 3px solid var(--amber); }
+.card.danger { border-left: 3px solid var(--red); }
+.card.ok { border-left: 3px solid var(--green); }
+
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+.stat { background: var(--bg-1); border: 1px solid var(--border); border-radius: 8px; padding: 14px; text-align: center; }
+.stat .num { font-size: 26px; font-weight: 800; font-family: var(--mono); }
+.stat .num.red { color: var(--red); }
+.stat .num.amber { color: var(--amber); }
+.stat .num.green { color: var(--green); }
+.stat .num.cyan { color: var(--cyan); }
+.stat .label { font-size: 11px; color: var(--text-mute); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+@media (max-width: 720px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { color: var(--text-mute); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; background: var(--bg-2); }
+tr:last-child td { border-bottom: none; }
+td.num { font-family: var(--mono); text-align: right; }
+td.num.high { color: var(--green); font-weight: 600; }
+td.num.mid { color: var(--amber); }
+td.num.low { color: var(--red); font-weight: 600; }
+td.name { font-weight: 600; }
+
+.badge { display: inline-block; padding: 2px 7px; border-radius: 3px; font-size: 11px; font-family: var(--mono); }
+.badge.pass { background: rgba(74,222,128,0.15); color: var(--green); }
+.badge.reject { background: rgba(248,113,113,0.15); color: var(--red); }
+.badge.hold { background: rgba(107,116,132,0.2); color: var(--text-mute); }
+.badge.edge { background: rgba(251,191,36,0.15); color: var(--amber); }
+
+.person-detail { background: var(--bg-2); border-radius: 8px; padding: 14px 16px; margin: 10px 0; border-left: 3px solid var(--red); }
+.person-detail.edge { border-left-color: var(--amber); }
+.person-detail.borderline { border-left-color: var(--cyan); }
+.person-name { font-weight: 700; font-size: 16px; margin-bottom: 8px; display: flex; align-items: baseline; gap: 10px; }
+.person-name .score { color: var(--amber); font-family: var(--mono); font-size: 18px; }
+.person-name .score.red { color: var(--red); }
+.person-name .score.green { color: var(--green); }
+.subscores { display: flex; gap: 12px; margin: 10px 0; font-size: 12px; font-family: var(--mono); }
+.subscores .sub { padding: 4px 10px; border-radius: 4px; background: var(--bg-3); }
+.subscores .sub .k { color: var(--text-mute); }
+.subscores .sub .v { color: var(--text); font-weight: 600; }
+.subscores .sub .v.high { color: var(--green); }
+.subscores .sub .v.mid { color: var(--amber); }
+.subscores .sub .v.low { color: var(--red); }
+.evidence { font-size: 12.5px; color: var(--text-dim); margin: 6px 0; }
+.evidence .label { color: var(--text-mute); font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; margin-right: 6px; }
+.formula { font-family: var(--mono); font-size: 12.5px; background: var(--bg-3); padding: 6px 10px; border-radius: 4px; margin: 8px 0; color: var(--cyan); }
+
+.finding { background: var(--bg-2); border-radius: 6px; padding: 12px 14px; margin: 8px 0; border-left: 3px solid var(--violet); }
+.finding-title { font-weight: 700; margin-bottom: 4px; }
+.finding-desc { font-size: 13px; color: var(--text-dim); }
+
+.footer { text-align: center; color: var(--text-mute); font-size: 12px; margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
+
+<main>
+
+<header>
+  <div class="title">fit-check 자동 판정 · 정확성 분석</div>
+  <div class="subtitle">2026-09-17 갱신 · 해커톤 마감 D-3 · 판정 근거 수치화 + 정확성 측정 방법</div>
+  <div class="timestamp">서류 심사 DB 실측(09-11 기준) · 판정 코드 <code>backend/app/application/screening.py</code> · 프롬프트 <code>chain_evaluate.v2.md</code></div>
+</header>
+
+<section class="card ok">
+  <strong>2026-09-17 갱신 · 이 문서에서 달라진 것 (핵심 5줄)</strong>
+  <ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim)">
+    <li><b>서류 판정·요약 서빙은 클라우드(AWS)+Anthropic Claude 로 확정(09-18).</b> Qwen 3갈래 어댑터 자체학습은 비용 절감 R&D 자산으로 완결됐다. 아래 서류 24명 실측은 <b>09-11 시점(Claude Haiku 기준)</b> 값으로, 시점을 명시해 둔다.</li>
+    <li><b>헥사고날 부분 적용 완결</b>(ADR-0035 · PR #184~#209): 판정 코드가 <code>backend/app/application/screening.py</code> 로 이관됐다. 규모는 테스트 <b>1072</b>개 · API <b>107</b>개 · 테이블 <b>28</b>개 · ADR <b>0001~0038</b> · 최신 PR <b>#328</b>.</li>
+    <li><b>"판정 정확성"의 범위를 넓혔다.</b> 서류 점수(문서 심사)뿐 아니라 <b>아르 에이전트 도구 호출 정확도(v9 pass_rate 73.9%)</b> · <b>요약 어댑터 정성 정확도</b>까지 같은 문서에서 다룬다. 새 §9·§10 참조.</li>
+    <li><b>같은 자(rubric)로 Claude vs Qwen(R&D) 을 재측정</b>: 69.6% vs 26.1%(도메인 미스매치) → v9 파인튜닝으로 격차 대폭 축소. §10 참조.</li>
+    <li><b>신규 기능 반영</b>: 이력서 드래그·드롭 접수(#326) · 같은 사람 재접수 diff UI(#327) · <b>탈락 축 빨간 표시</b>(#328, 서류/면접/종합 어디서 떨어졌는지 한눈에). 홍지민 배지 서사가 정식 diff UI 로 승격됐다.</li>
+  </ul>
+</section>
+
+<section class="card warn">
+  <strong>서류 24명 정정(09-12 확인 · 유지)</strong> · 인수인계에는 "자동 불합격 3명 (한지우·박도윤·정민호)" 이라 되어 있었지만, DB 실측 · 이 3명 모두 <strong>자동 합격</strong>이었음.
+  <br>실제 자동 불합격 8명 · 자동 합격 14명 · 요약 대기 2명 (문가영·장우진 · 정보 부족 지원자). <span style="color:var(--text-mute);font-size:12.5px">이하 §1~§8 은 09-11 서류 심사 실측을 유지하고 시점을 명시한다.</span>
+</section>
+
+<h2>1. 전체 상태 · 한눈에 (서류 심사, 09-11 실측)</h2>
+
+<div class="summary-grid">
+  <div class="stat"><div class="num red">8</div><div class="label">자동 불합격</div></div>
+  <div class="stat"><div class="num green">14</div><div class="label">자동 합격</div></div>
+  <div class="stat"><div class="num amber">2</div><div class="label">요약 대기</div></div>
+  <div class="stat"><div class="num cyan">60</div><div class="label">합격 기준</div></div>
+</div>
+
+<h2>2. 판정 알고리즘 · 어떻게 계산하는가</h2>
+
+<div class="card">
+  <p><strong>문서 점수 (0-100) = 세 부분의 가중 평균</strong></p>
+  <div class="formula">
+    doc_score = (requirements × 50 + preferred × 20 + culture × 30) / 100
+  </div>
+  <table>
+    <tr><th>항목</th><th>가중치</th><th>0 → 100 기준</th></tr>
+    <tr><td><strong>requirements</strong></td><td class="num">50%</td><td>필수 요건을 전부, 요구 수준 이상으로 충족 → 100</td></tr>
+    <tr><td><strong>preferred</strong></td><td class="num">20%</td><td>우대 항목을 실제 경험으로 여럿 보임 → 100. 없으면 50.</td></tr>
+    <tr><td><strong>culture</strong></td><td class="num">30%</td><td>인재상 "함께 일하고 싶은 사람" 흔적 → 100. 근거 없으면 50. "잘 안 맞음" 신호 → 낮음.</td></tr>
+  </table>
+  <p style="margin-top: 12px; color: var(--text-dim); font-size: 13px;">
+    각 항목은 <strong>chain_evaluate.v2.md</strong> 프롬프트가 LLM 호출로 산출. 기준은 <code>company_profile.scoring_weights</code>. 총점 <strong>≥ 임계값(60)</strong>이면 자동 합격, 아니면 불합격.
+  </p>
+  <p style="margin-top: 8px; color: var(--text-mute); font-size: 12.5px;">
+    ⚠ <b>시점 주의</b>: 아래 24명 실측은 <b>09-11 · Claude Haiku 호출</b> 기준이다. 심사·프로덕션 판정 서빙은 09-18 확정으로 <b>클라우드(AWS)+Anthropic Claude</b> 이고, Qwen 어댑터 실측(§9·§10)은 비용 절감 R&D 자산의 정확도 참고 자료다.
+  </p>
+</div>
+
+<h2>3. 자동 불합격 8명 · 근거 수치 (09-11 실측)</h2>
+
+<div class="person-detail">
+  <div class="person-name">최유진 · id 67 (FE) · <span class="score red">37점</span> <span class="badge reject">불합격</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v low">15</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">65</span></div>
+  </div>
+  <div class="formula">(15×50 + 50×20 + 65×30) / 100 = 750 + 1000 + 1950 = 37</div>
+  <div class="evidence"><span class="label">근거:</span> React·TypeScript 실무 경험 0년 (필수 2년 이상). HTML 기초만 있음. 마케팅 4년 → 프론트엔드 전직 시도 중.</div>
+  <div class="evidence"><span class="label">판정:</span> 명확한 요건 미달 · 정확</div>
+</div>
+
+<div class="person-detail">
+  <div class="person-name">최유진 · id 81 (BE) · <span class="score red">37점</span> <span class="badge reject">불합격</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v low">15</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">65</span></div>
+  </div>
+  <div class="evidence"><span class="label">근거:</span> Python·FastAPI·PostgreSQL 실서비스 개발 경험 전무. SQL·데이터 파이프라인 감각은 있음. 동명이인 · FE 지원과 같은 프로필.</div>
+  <div class="evidence"><span class="label">판정:</span> 명확한 요건 미달 · 정확</div>
+</div>
+
+<div class="person-detail">
+  <div class="person-name">오하람 · id 78 · <span class="score red">44점</span> <span class="badge reject">불합격</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v low">35</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">55</span></div>
+  </div>
+  <div class="evidence"><span class="label">근거:</span> 데이터 엔지니어 3년 (Python·PostgreSQL 튜닝 有) → 백엔드 지원. API 서버 실무는 없음. FastAPI·Django 경험 미기재.</div>
+  <div class="evidence"><span class="label">판정:</span> 데이터 엔지니어 vs 백엔드 개발자 경계 · 판정은 타당하나 · 학습 곡선 감안하면 재고 가능</div>
+</div>
+
+<div class="person-detail borderline">
+  <div class="person-name">홍지민 · id 52 · <span class="score red">49점</span> <span class="badge reject">불합격</span> <span class="badge edge">재접수 diff 시연 대상</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v low">45</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">55</span></div>
+  </div>
+  <div class="evidence"><span class="label">근거:</span> Node.js·Express BFF 경험 有 (기술 스택 다름). Python·FastAPI·PostgreSQL 실무 없음. MongoDB 만 실무.</div>
+  <div class="evidence"><span class="label">판정:</span> Node.js 5년 vs Python 요건 3년 · 스택 자체가 다름 · <strong>정확한 판정</strong>. 최근 Node.js → Python 전환 트렌드 감안하면 우대 가점 논의 여지.</div>
+  <div class="evidence"><span class="label">시연 · diff:</span> 이력서 sha256 이 옛 것 유지 · 새 PDF 업로드됨 → "내용이 바뀜" 시연 대상. <b>09-17 갱신</b>: 이 서사가 정식 <b>재접수 diff UI(#327)</b> + <b>변동 배지</b>로 승격됐다. 같은 사람 재접수 시 이전 지원 대비 이력서 변동을 요약 chain(resume_diff, #320)이 감지해 화면에 diff 로 띄운다.</div>
+</div>
+
+<div class="person-detail edge">
+  <div class="person-name">임재원 · id 74 · <span class="score red">54점</span> <span class="badge reject">불합격</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v high">65</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v low">25</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">55</span></div>
+  </div>
+  <div class="formula">(65×50 + 25×20 + 55×30) / 100 = 3250 + 500 + 1650 = 54</div>
+  <div class="evidence"><span class="label">근거:</span> FastAPI 3년 실무 (필수 충족!) · 하지만 <strong>우대 사항 부족 (25점)</strong> · CI·pytest·JWT·큐 경험 미기재 · alembic·쿼리 튜닝 부재.</div>
+  <div class="evidence"><span class="label">판정 이슈:</span> <strong>필수 요건은 통과했는데 · 우대 부족으로 탈락</strong>. 우대 20% 가중치가 부족 · 재검토 여지 있음. <b>09-17</b>: C 개선(#182, 우대 20→10)으로 완화된 축.</div>
+</div>
+
+<div class="person-detail edge">
+  <div class="person-name">백서준 · id 80 · <span class="score red">56점</span> <span class="badge reject">불합격</span></div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v mid">62</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v low">15</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v high">72</span></div>
+  </div>
+  <div class="formula">(62×50 + 15×20 + 72×30) / 100 = 3100 + 300 + 2160 = 55.6 ≈ 56</div>
+  <div class="evidence"><span class="label">근거:</span> Flask 2년 (필수 3년 미달) · FastAPI 는 사이드 프로젝트 · culture 72 (문화 우수). preferred 15 (매우 낮음).</div>
+  <div class="evidence"><span class="label">판정 이슈:</span> <strong>문화는 우수 · 경력 1년 부족 + 우대 낮음</strong>. 아슬한 케이스.</div>
+</div>
+
+<div class="person-detail edge">
+  <div class="person-name">남기훈 · id 79 · <span class="score red">58점</span> <span class="badge reject">불합격</span> ⚠</div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v high">75</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v low">35</span></div>
+  </div>
+  <div class="formula">(75×50 + 50×20 + 35×30) / 100 = 3750 + 1000 + 1050 = 58</div>
+  <div class="evidence"><span class="label">근거:</span> <strong>FastAPI·PostgreSQL 5년 실무 (요건 3년 초과)</strong> · alembic 리비전 순차 배포 有 · DB 튜닝 有.</div>
+  <div class="evidence"><span class="label">culture 35 이유:</span> "회의 기반 의사결정, 승인 기반 조직문화 적응" 문구가 <strong>인재상의 '자율 결정권'과 불일치 신호</strong>로 판정됨.</div>
+  <div class="evidence"><span class="label">⚠ 판정 이슈:</span> <strong>요건 우수 지원자 · 문화 하나로 탈락</strong>. <b>09-17</b>: B 개선(#182)의 <b>문화 하한 규칙</b>(요건 70↑이면 culture 50 미만 방지)이 바로 이 케이스를 막는다.</div>
+</div>
+
+<div class="person-detail edge">
+  <div class="person-name">강현우 · id 68 · <span class="score red">59점</span> <span class="badge reject">불합격</span> ⚠</div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v high">65</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v mid">50</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">55</span></div>
+  </div>
+  <div class="formula">(65×50 + 50×20 + 55×30) / 100 = 3250 + 1000 + 1650 = 59</div>
+  <div class="evidence"><span class="label">근거:</span> React·TypeScript 3년 실무 · Redux · 무장애 배포. REST API 인증 경험·PR 문서화 미기재.</div>
+  <div class="evidence"><span class="label">⚠ 판정 이슈:</span> <strong>정확히 1점 차이로 탈락</strong>. 임계값 감도 문제. 60점이었으면 자동 합격. (A안 경계선 hold 는 여전히 미구현.)</div>
+</div>
+
+<h2>4. 판정 정확성 · 세 가지 문제 발견 (09-11)</h2>
+
+<div class="finding">
+  <div class="finding-title">① 남기훈 (58) · 요건 우수인데 culture 하나로 탈락</div>
+  <div class="finding-desc">
+    requirements 75 (요건 초과 충족) · preferred 50 · <strong>culture 35 로 결정적 감점</strong>.<br>
+    "회의 기반 의사결정" 자소서 문구가 인재상 (자율 결정권 선호) 과 불일치로 판정.<br>
+    <strong>→ 대응(구현됨)</strong> · <b>B. 문화 하한 규칙</b>(#182): 요건 ≥ 70 이면 culture 가 50 미만으로 내려가지 않음.
+  </div>
+</div>
+
+<div class="finding">
+  <div class="finding-title">② 강현우 (59) · 1점 차이로 탈락</div>
+  <div class="finding-desc">
+    임계값 60 에 <strong>정확히 1점 못 미침</strong>. 3년 실무 경력 있음.<br>
+    <strong>→ 제안(미구현)</strong> · 55-65 경계선 지원자는 자동 판정 대신 <code>hold</code> · 담당자 리뷰. A안, 팀 결정 사항.
+  </div>
+</div>
+
+<div class="finding">
+  <div class="finding-title">③ 임재원 (54) · 요건 충족했는데 우대 부족으로 탈락</div>
+  <div class="finding-desc">
+    requirements 65 (통과!) · preferred 25 (매우 낮음) · culture 55.<br>
+    <strong>→ 대응(구현됨)</strong> · <b>C. 우대 가중치 20 → 10</b>(#182). 필수 통과자를 우대 부족으로 떨어뜨리는 감도를 낮춤.
+  </div>
+</div>
+
+<h2>5. 개선 방향 · 세 가지 (반영 현황)</h2>
+
+<div class="card">
+  <h3 style="margin-top:0">A. 경계선 지원자 · 자동 판정 대신 hold <span class="badge hold">미구현 · 팀 결정</span></h3>
+  <p>55-65 사이 (임계값 ±5) 는 <code>hold</code> 로 두고 담당자 리뷰. 자동 판정 실수 방지.</p>
+  <p style="font-size: 12px; color: var(--text-mute);">코드 위치 · <code>backend/app/application/screening.py</code> (경로 이관 · ADR-0035) · <code>if score >= threshold</code> 로직에 경계 범위 추가.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">B. 요건 우수자는 culture 하한 보장 <span class="badge pass">구현됨 · #182</span></h3>
+  <p><strong>requirements ≥ 70 이면 · culture 가 50 미만으로 내려가지 않음</strong>(문화 하한 규칙). 남기훈 같은 케이스 방지.</p>
+  <p style="font-size: 12px; color: var(--text-mute);"><code>doc_score_from</code> 에 반영 · <code>CULTURE_FLOOR_WHEN_REQUIREMENTS_HIGH=50</code> · <code>REQUIREMENTS_HIGH_THRESHOLD=70</code>.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">C. 우대 가중치 20 → 10 · 필수 통과자 보호 <span class="badge pass">구현됨 · #182</span></h3>
+  <p>임재원처럼 <strong>필수는 만족했는데 우대 부족으로 탈락</strong> 하는 케이스 방지. 필수 요건 50 → 60.</p>
+  <p style="font-size: 12px; color: var(--text-mute);"><code>DEFAULT_WEIGHTS</code> · <code>{"doc_preferred": 10}</code>.</p>
+</div>
+
+<h2>6. 자동 합격 14명 · 참고 (09-11)</h2>
+
+<div class="card">
+  <table>
+    <tr><th>점수</th><th>이름</th><th>주요 근거</th></tr>
+    <tr><td class="num high">86</td><td class="name">한지우 (FE)</td><td>React·TS 2년+, 성능 최적화 실전, 협업 문화</td></tr>
+    <tr><td class="num high">86</td><td class="name">류성민 (BE)</td><td>고득점</td></tr>
+    <tr><td class="num high">84</td><td class="name">조민석 (BE)</td><td>고득점</td></tr>
+    <tr><td class="num high">82</td><td class="name">Emily Park (FE)</td><td>영어 이력서 · 정상 채점</td></tr>
+    <tr><td class="num high">81</td><td class="name">Daniel Kim (BE)</td><td>영어 이력서 · 정상 채점</td></tr>
+    <tr><td class="num high">78</td><td class="name">배수아 (BE) · 오세린 (FE)</td><td>영어 이력서 · 정상 채점</td></tr>
+    <tr><td class="num high">77</td><td class="name">김태호 (FE)</td><td>안정 합격</td></tr>
+    <tr><td class="num mid">66</td><td class="name">윤하늘 (FE)</td><td>중간 합격</td></tr>
+    <tr><td class="num mid">61</td><td class="name">박도윤 (FE)</td><td><strong>Vue 6년 · React 요건 미충족</strong> (요건 55). 우대·문화로 상쇄.</td></tr>
+    <tr><td class="num mid">60</td><td class="name">이서연 (FE) · 정민호 (FE) · 서지훈 (FE) · 신예은 (BE)</td><td><strong>정확히 임계값</strong> · 아슬 합격</td></tr>
+  </table>
+</div>
+
+<h3>박도윤 (61점) · 흥미로운 케이스</h3>
+<div class="person-detail borderline">
+  <div class="person-name">박도윤 · id 63 · <span class="score green">61점</span> <span class="badge pass">합격</span> · Vue 6년 → React 지원</div>
+  <div class="subscores">
+    <div class="sub"><span class="k">requirements:</span> <span class="v low">55</span></div>
+    <div class="sub"><span class="k">preferred:</span> <span class="v high">70</span></div>
+    <div class="sub"><span class="k">culture:</span> <span class="v mid">65</span></div>
+  </div>
+  <div class="evidence"><span class="label">근거:</span> Vue/Nuxt 6년 · <strong>React 실무 없음 (요건 미충족)</strong> · TypeScript 전환 리드, 성능 최적화 (1.2초→200ms), 팀 합의 로드맵.</div>
+  <div class="evidence"><span class="label">판정 특징:</span> requirements 55 (미충족) 이지만 · preferred 70 (기술 이관 경험 우대) + culture 65 → 총점 61 로 통과. <strong>알고리즘이 "이관 지원자" 를 포용한 케이스</strong>.</div>
+</div>
+
+<h2>7. 문가영 · 장우진 · 요약 대기 (원인 규명 완료)</h2>
+
+<div class="card warn">
+  <p><strong>doc_score = null · 요약 미완료</strong>.</p>
+  <p>인수인계에 "문가영 · 정보 부족 서사 · 아르가 정보 부족 인정" 대상으로 표시. 실제 · 채점 자체가 안 됨.</p>
+  <div style="margin-top:12px;padding:12px 14px;background:rgba(74,222,128,0.08);border-left:3px solid var(--green);border-radius:6px">
+    <strong style="color:var(--green)">2026-09-12 확인 · 자료 자체가 비어 있다 (정상 판단)</strong><br>
+    장우진(id 82) 첨부를 프로덕션에서 직접 추출: <b>이력서 PDF 291자</b>(대부분 이메일·전화·생년월일) · <b>자기소개서 PDF 54자</b>("파이썬 백엔드 4년." 한 문장) · 자기소개 입력칸 27자.
+    <b>PDF 추출 경로는 정상</b>이고 텍스트가 stub 이다. 아르가 <code>insufficient: true</code> 로 남긴 것은 <b>정상 판단</b>이다.<br>
+    <span style="font-size:12.5px;color:var(--text-dim)">같이 발견된 <b>실제 버그</b>: "다시 생성" 버튼에 <code>onClick</code> 이 없어 눌러도 요청이 안 나감(프로덕션 로그 90분 호출 0건). PR #208 로 배선 + 실패 사유(503/422/네트워크) 표시.</span>
+  </div>
+</div>
+
+<h2>8. 시연 시나리오 · 09-17 갱신</h2>
+
+<div class="card danger">
+  <p><strong>시연 시나리오 정정 · 신규 UI 반영</strong>:</p>
+  <ul>
+    <li><del>"자동 불합격 3명: 한지우·박도윤·정민호"</del> → 실제 · <strong>자동 합격 14명 · 자동 불합격 8명</strong></li>
+    <li>불합격 근거 블록 시연 · <strong>남기훈</strong>(요건 우수·문화 탈락 → B 규칙으로 방지) · <strong>강현우</strong>(1점 차이) · <strong>임재원</strong>(요건 통과·우대 부족 → C 로 완화) 세 케이스가 알고리즘 논의점 풍부</li>
+    <li><strong>탈락 축 빨간 표시(#328)</strong> · 서류/면접/종합 어디서 떨어졌는지 한눈에. 05-design §1「색은 판단에만」 준수. 위 세 케이스가 그대로 "서류 탈락 축" 시연 소재가 됨</li>
+    <li><strong>이력서 재접수 diff(#327) + 드래그·드롭 접수(#326)</strong> · 홍지민(id 52) 이 정식 diff 시연 대상. 같은 사람 재접수 시 변동 배지 + diff 노출</li>
+    <li>박도윤 (61) · <strong>기술 이관 성공 케이스</strong> · 알고리즘이 유연하게 판정한 예시로 시연 가능</li>
+  </ul>
+</div>
+
+<h2>9. 판정 정확성을 어떻게 "측정"하는가 (신설)</h2>
+
+<div class="card">
+  <p>서류 점수는 위 §2 공식으로 나오지만, "판정이 정확한가"는 <b>세 갈래</b>로 따로 측정한다. 멘토가 "성능을 어떻게 측정하냐"고 물으면 이 표가 답이다.</p>
+  <table>
+    <tr><th>측정 대상</th><th>방법</th><th>결과 (09-17)</th></tr>
+    <tr><td><b>아르 도구 호출</b></td><td>정답 케이스 대비 pass_rate · fail 사유를 <b>UX정상 / 진짜실수</b>로 분류</td><td class="num">v9 <b>73.9%</b> (17/23) · §10</td></tr>
+    <tr><td><b>Claude vs Qwen (R&D 비교)</b></td><td>같은 케이스·같은 rubric 으로 두 모델 대조</td><td class="num">69.6% vs <b>26.1%</b> · §10</td></tr>
+    <tr><td><b>요약 어댑터</b></td><td>JSON 유효성·gist·key_skills·career_years 항목별 정성 대조</td><td>career_years 만 오차 · §10</td></tr>
+  </table>
+  <p style="font-size:12.5px;color:var(--text-mute)">서류 심사(§2~§8)와 이 세 측정은 층위가 다르다. 서류 심사는 "점수가 맞나", 이 절은 "어떤 모델·어댑터로 판정을 돌려야 정확한가"를 본다.</p>
+</div>
+
+<h2>10. 어댑터 정확도 · Qwen 3갈래 R&D 자산 (신설)</h2>
+
+<div class="card ok">
+  <h3 style="margin-top:0">아르 도구 호출 (chat/agent = qwen3-arda-agent v9)</h3>
+  <p>도구 호출 <b>pass_rate 73.9% (17/23)</b> 실측. fail 6건 중 <b>5건은 UX상 정상</b>(pending_pass · 안전 다단계) → 실질 ~95%+. <b>진짜 실수는 1건</b>(list_postings 오선택). v6·v7·v8 을 모두 상회.</p>
+  <div class="finding" style="border-left-color:var(--cyan)">
+    <div class="finding-title">같은 자(rubric)로 Claude vs Qwen (R&D 비교)</div>
+    <div class="finding-desc">
+      옛 측정에서 Claude <b>69.6%</b> vs Qwen <b>26.1%</b> — 격차의 상당 부분이 <b>도메인 미스매치</b>였다. v9 파인튜닝으로 이 격차를 대폭 축소했다(R&D 실측). 다만 해커톤 심사 서빙 기준은 판단 품질·서비스 안정성·트래픽 대응(오토스케일)을 이유로 <b>클라우드(AWS)+Anthropic Claude</b> 로 확정했고, Qwen 어댑터는 비용 절감 R&D 자산으로 남긴다.
+    </div>
+  </div>
+</div>
+
+<div class="card warn">
+  <h3 style="margin-top:0">요약 어댑터 (summary = qwen3-arda-summary · summary-2026-09-17)</h3>
+  <p>정성 확인: <b>JSON 완벽 · gist · key_skills 정확</b>. 다만 <b>career_years 만 인턴 포함 오차</b> — 정답 3년을 5년으로 셈(R&D 실측). career_years 는 인턴 포함 여부에서 오차가 나기 쉬운 축이라, 심사에서 Claude 로 서빙하는 서류 요약·이력서 재접수 diff 에서도 담당자 확인 축으로 표기한다.</p>
+  <p style="font-size:12px;color:var(--text-mute)">⚠ 혼동 금지 · v6~v9 는 <b>chat 어댑터</b>, summary-2026-09-17 은 <b>요약 전용</b> 최초 어댑터. 겸용 아님. 면접 chain 은 별도 <code>qwen3-arda-interview</code>.</p>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">09-17 운영 리허설 (우정)</h3>
+  <p>전체 흐름 <b>13분 무중단</b>(공고→지원→서류→면접→분석→채점→합격→메일). <b>얼굴 인식 86%</b> · <b>실시간 판정 57/57</b> 담당자 화면 도착 · 메일 4통 발송. 서류 판정과 실시간 판정이 한 흐름에서 끊김 없이 도달함을 확인.</p>
+</div>
+
+<div class="footer">
+  <div>작성: suvisdev의 Claude · 2026-09-17 (09-11 서류 실측 유지 · 정확성 측정 절 신설)</div>
+  <div>DB 실측 기반 · 판정 코드 <code>backend/app/application/screening.py</code> · 프롬프트 <code>chain_evaluate.v2.md</code> · 어댑터 v9 / summary-2026-09-17</div>
+</div>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arda 온프레미스 종합보고 · 2026-09-18</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --ink:#1c2530; --muted:#5b6775; --line:#e2e6ec;
+    --accent:#2f6fed; --accent-soft:#eaf1fe;
+    --bad:#c0392b; --bad-soft:#fdecea; --good:#1e8e5a; --good-soft:#e7f6ee;
+    --warn:#b7791f; --warn-soft:#fdf3e2;
+    --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif;
+    line-height:1.7; font-size:15.5px;
+  }
+  .wrap{max-width:940px; margin:0 auto; padding:0 20px 80px}
+  header.top{
+    background:linear-gradient(135deg,#1f2a44,#2f4a7a); color:#fff;
+    padding:44px 20px 40px; margin-bottom:28px;
+  }
+  header.top .inner{max-width:940px; margin:0 auto}
+  header.top .tag{display:inline-block; font-size:12.5px; letter-spacing:.08em; text-transform:uppercase;
+    background:rgba(255,255,255,.16); padding:4px 10px; border-radius:20px; margin-bottom:14px}
+  header.top h1{margin:0 0 8px; font-size:27px; font-weight:700; line-height:1.3}
+  header.top p{margin:0; color:#cdd8ee; font-size:14.5px; max-width:720px}
+  h2{font-size:20px; margin:38px 0 14px; padding-bottom:8px; border-bottom:2px solid var(--line)}
+  h2 .n{color:var(--accent); font-weight:700; margin-right:8px}
+  h3{font-size:16px; margin:22px 0 8px; color:#243244}
+  p{margin:10px 0}
+  a{color:var(--accent)}
+  code{font-family:var(--mono); font-size:.9em; background:#eef1f5; padding:1px 5px; border-radius:4px; color:#374252}
+  ul{margin:8px 0 8px; padding-left:20px} li{margin:4px 0}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px 20px; margin:14px 0;
+    box-shadow:0 1px 2px rgba(20,30,50,.04)}
+  .decision{border-left:5px solid var(--accent); background:linear-gradient(90deg,var(--accent-soft),#fff 60%)}
+  table{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px; background:var(--card);
+    border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top}
+  th{background:#f0f3f7; font-weight:600; color:#33404f; font-size:13px}
+  tr:last-child td{border-bottom:none}
+  td:first-child{white-space:nowrap; font-weight:600; color:#2a3441;}
+  .err{border-left:4px solid var(--bad); background:var(--card); border-radius:10px; padding:14px 18px; margin:14px 0; border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line)}
+  .err h3{margin-top:0; color:var(--bad)}
+  .kv{display:grid; grid-template-columns:64px 1fr; gap:4px 10px; margin:8px 0; font-size:14px}
+  .kv .k{font-weight:700; color:var(--muted)}
+  .badge{display:inline-block; font-size:12px; font-weight:600; padding:2px 9px; border-radius:20px; margin-right:6px}
+  .b-bad{background:var(--bad-soft); color:var(--bad)}
+  .b-good{background:var(--good-soft); color:var(--good)}
+  .b-warn{background:var(--warn-soft); color:var(--warn)}
+  .fix{background:var(--good-soft); border-radius:8px; padding:8px 12px; margin-top:8px; font-size:13.5px}
+  .fix b{color:var(--good)}
+  .muted{color:var(--muted); font-size:13.5px}
+  footer{margin-top:44px; padding-top:18px; border-top:1px solid var(--line); color:var(--muted); font-size:13px}
+  @media print{ body{background:#fff} .card,table,.err{box-shadow:none} header.top{background:#1f2a44 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact} }
+  @media (max-width:560px){ header.top h1{font-size:22px} .kv{grid-template-columns:56px 1fr} }
+</style>
+</head>
+<body>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
+
+<header class="top"><div class="inner">
+  <span class="tag">On-Premise Final Report</span>
+  <h1>Arda 온프레미스 — 구축 · 운영 · 오류 · 폐쇄 종합보고</h1>
+  <p>심사기간(09-20~10-17) 프리즈 배포를 3대 PC 온프레미스로 구축했다가, 2026-09-18 온프레미스를 폐쇄하고 AWS(Anthropic Claude) 배포로 전환하기로 결정. 무엇을 만들었고 · 어떤 오류를 어떻게 고쳤으며 · 왜 접었는지의 기록.</p>
+</div></header>
+
+<div class="wrap">
+
+  <div class="card decision">
+    <h3 style="margin-top:0">최종 결정 요약</h3>
+    <table>
+      <tr><td>결정</td><td><b>온프레미스 폐쇄 · 심사는 AWS(EC2, Seuk-Team/Arda 배포)로 진행</b></td></tr>
+      <tr><td>시점</td><td>2026-09-18</td></tr>
+      <tr><td>핵심 사유</td><td>온프레미스 고유의 실패가 심사 직전에 계속 쌓임 — 로컬 sLLM(qwen3)의 다단계 도구호출 불안정, 브라우저→내부 MinIO 접근 불가. AWS 는 Claude(안정적 도구호출)+실 S3(브라우저 접근 가능)라 이 부류 오류가 원천적으로 없음</td></tr>
+      <tr><td>AWS 로 이관</td><td><b>심사자용 데모 로그인</b>(<code>Login.tsx</code> + 시연계정 잠금) → Seuk-Team/Arda 커밋 (AWS auto-CD 가 origin/main ff-merge 배포)</td></tr>
+      <tr><td>자산 보존</td><td>코드는 해커톤 repo(<code>Seuk-Hackathon/arda</code>). 학습 어댑터·GPU 이미지·문서는 PC1/바탕화면</td></tr>
+    </table>
+  </div>
+
+  <h2><span class="n">1.</span>온프레미스에서 무엇을 만들었나 (구성)</h2>
+
+  <h3>1-1. 3대 PC 역할</h3>
+  <table>
+    <tr><th>PC</th><th>IP</th><th>역할</th></tr>
+    <tr><td>PC1</td><td>192.168.0.235</td><td>Postgres · api · Caddy · n8n · MinIO · cloudflared(터널) · <b>Ollama (GPU RTX 3050)</b></td></tr>
+    <tr><td>PC2</td><td>192.168.0.115</td><td>lie-detection (거짓말탐지 + <b>STT</b> + 표정 ViT) · RTX 3050</td></tr>
+    <tr><td>PC3</td><td>192.168.0.122</td><td>Ollama 예비(standby)</td></tr>
+  </table>
+  <ul>
+    <li>전부 Windows 10 + WSL2 Ubuntu-24.04 + Docker CE. 사용자 <code>arda</code>.</li>
+    <li><b>외부 노출</b>: Cloudflare Tunnel(PC1) → Caddy → api/n8n/lie-detection. <code>arda.suvisdev.cloud</code>(프론트·Vercel) · <code>arda-api.suvisdev.cloud</code>(api · <code>/ai/*</code>→PC2 · <code>/n8n/*</code>)</li>
+    <li><b>가용성</b>: Watchdog(작업 스케줄러)가 WSL·컨테이너·socat 릴레이를 살려둠.</li>
+  </ul>
+
+  <h3>1-2. AI 스택 (당시 직접 학습 모델)</h3>
+  <p class="muted">아래는 온프레 당시 구성이다. 심사·운영 서빙은 클라우드 Anthropic Claude(요약·평가·추천 3단 체인·도구 호출·FAQ)로 확정됐고, STT 는 OpenAI <code>whisper-1</code> API 를 쓴다. Qwen3 어댑터 3종은 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 보존한다.</p>
+  <ul>
+    <li><b>Ollama + qwen3:8b + LoRA 어댑터</b>(PC1 GPU 상주): <code>arda-agent</code>(채팅·도구) <b>v9</b> · <code>arda-interview</code>(면접) v6 · <code>arda-summary</code>(서류요약 전용) <b>v1</b></li>
+    <li><b>STT</b>: PC2 lie-detection 이 faster-whisper <code>large-v3-turbo</code>(int8, CPU). (현재 AWS 운영 STT 는 OpenAI <code>whisper-1</code> API)</li>
+    <li><b>표정 ViT</b>: <code>cloverky/arda-expression-vit</code>(CPU) · 얼굴 랜드마크는 MediaPipe(CPU)</li>
+  </ul>
+
+  <h3>1-3. 데이터 · 파일</h3>
+  <ul>
+    <li><b>DB</b>: AWS 프로덕션 <code>pg_dump</code>(09-16)를 PC1 Postgres 에 restore. 더미 지원자 15 + fit-check 24명(전부 가상 인물·example.com)</li>
+    <li><b>이력서 파일</b>: 브라우저가 <code>minio:9000</code> 에 못 닿아 <b>Postgres <code>file_blobs</code>(bytea) + 1회용 티켓 스트리밍</b>으로 미리보기(ADR-0028 앵커라 미리보기 전용)</li>
+    <li><b>메일</b>: n8n(<code>stage-changed-arda</code>) + Gmail SMTP. <code>MAIL_DISPATCH=n8n</code> 이라 <code>MAIL_DRY_RUN</code> 무관 실발송</li>
+  </ul>
+
+  <h2><span class="n">2.</span>발생한 오류와 수정 내역 <span class="muted">(증상 → 원인 → 수정)</span></h2>
+
+  <div class="err">
+    <h3>2-1. Watchdog .ps1 파서 오류</h3>
+    <div class="kv"><span class="k">증상</span><span><code>register-watchdog.ps1</code>/<code>wsl-watchdog.ps1</code> 가 PowerShell 5.1 에서 파싱 실패</span>
+    <span class="k">원인</span><span>한글 주석 + 따옴표 손실(<code>Start-Process -ArgumentList "-c","sleep infinity"</code> 의 따옴표 벗겨짐)</span></div>
+    <div class="fix"><b>수정</b> — ASCII 전용 재작성 + 인자를 <code>'"sleep infinity"'</code> 로 따옴표 보존. keepalive 정상(result=0). 교훈: .ps1 은 영문 전용 + 전달 전 ParseFile/dry-run.</div>
+  </div>
+
+  <div class="err">
+    <h3>2-2. STT 답변이 "자기 멋대로" 저장됨 <span class="badge b-bad">가장 오래 헤맴</span></h3>
+    <div class="kv"><span class="k">증상</span><span>면접 답변 전사가 첫 답변 빼고 엉뚱하게 저장. AWS 에선 멀쩡</span>
+    <span class="k">오진</span><span>STT 엔진(CPU whisper) 문제로 의심 → GPU 시도(이미지에 CUDA 없어 실패), OpenAI 키 필요한지 검토</span>
+    <span class="k">진짜 원인</span><span><b>엔진이 아니라 컨테이너 재기동 타이밍.</b> STT 설정을 바꾸며 PC2 lie-detection 을 <b>면접 진행 중</b>에 4번 재기동. 답변 음성은 파일이 아니라 <b>컨테이너 메모리에만</b> 있어(PROTOCOL.md) 재기동 시 그때까지 발화가 사라지고, 재접속 뒤 조각만 전사 → "첫 답변만 멀쩡"</span></div>
+    <div class="fix"><b>검증</b> — 한국어 TTS 답변 4종을 실제 프로토콜로 흘려 넣는 재현 클라이언트 작성. PC2 직결·터널경유 <b>12/12 정확 전사</b>(답변당 7.5초). 즉 온프레 STT 엔진 자체는 정상(엔진 문제 아님).<br><b>수정</b> — 면접 중 lie-detection 재기동 금지 규칙화 · 내가 넣은 <code>STT_TIMEOUT_SEC=60</code> 제거(기본 180 복원)</div>
+  </div>
+
+  <div class="err">
+    <h3>2-3. 서류 요약 점수가 전원 64~65점으로 수렴 <span class="badge b-bad">변별력 상실</span></h3>
+    <div class="kv"><span class="k">증상</span><span>온프레미스 요약 재생성 시 모든 지원자 64~65점. AWS(Haiku)에선 정상</span>
+    <span class="k">원인</span><span><code>chain_evaluate.v2</code> 프롬프트의 <b>출력 예시 숫자 70/40/60 을 소형 모델(qwen3)이 그대로 베낌.</b> Claude 는 안 베껴서 AWS 에선 안 드러남</span></div>
+    <div class="fix"><b>수정</b> — <code>chain_evaluate.v3</code>: 예시 숫자 제거, 채점 구간표+절차 명시, 요건 비면 공고 제목 사용. 실측: 문해린 85·한지우 85·오하람 40·한도윤(디자이너) 15 ↔ Haiku 78·86·44 와 같은 방향 (커밋 <code>6daaf32</code>). ※ v9 채팅 어댑터는 요약에 부적합(<code>&lt;tool_call&gt;</code> 냄) → 전용 <code>arda-summary</code> 유지</div>
+  </div>
+
+  <div class="err">
+    <h3>2-4. 요약 JSON 파싱 실패로 점수 NULL</h3>
+    <div class="kv"><span class="k">증상</span><span>56명 재생성 중 2명 서류점수 NULL(step2 파싱 실패)</span>
+    <span class="k">원인</span><span>소형 모델이 문자열 안에 <b>이스케이프 안 된 따옴표</b>를 써서 JSON 깨짐. Ollama <code>format</code> 스키마도 못 막음</span></div>
+    <div class="fix"><b>수정</b> — 파서에 <b>문자열 내부 따옴표 복구 폴백</b>(<code>_repair_inner_quotes</code>) 추가. 정상 JSON 은 그대로 (커밋 <code>615357d</code>). 이후 56/56 파싱 성공</div>
+  </div>
+
+  <div class="err">
+    <h3>2-5. 이력서 미리보기: 브라우저가 MinIO 에 못 닿음</h3>
+    <div class="kv"><span class="k">증상</span><span>이력서 클릭 시 안 열림</span>
+    <span class="k">원인</span><span>presign 다운로드 URL 이 <code>minio:9000</code>(컨테이너 내부 호스트) → 브라우저에서 이름이 안 풀림</span></div>
+    <div class="fix"><b>수정</b> — 파일 본문을 Postgres <code>file_blobs</code> 에 넣고 1회용 티켓 API URL 로 스트리밍(inline 미리보기). <code>PUBLIC_API_BASE_URL</code> 로 절대 URL 스킴 고정(mixed-content 해결)</div>
+  </div>
+
+  <div class="err">
+    <h3>2-6. 이력서 <u>업로드</u>: 브라우저가 MinIO 에 못 올림 <span class="badge b-warn">폐쇄 직전 발견</span></h3>
+    <div class="kv"><span class="k">증상</span><span>아르 채팅 이력서 드롭 / 공개 지원폼에서 "올리지 못했습니다"</span>
+    <span class="k">원인</span><span>업로드도 presign 으로 브라우저가 <code>minio:9000</code> 에 직접 PUT → 온프레에선 못 닿음. <b>공개 지원폼도 같은 코드라 온프레에선 아무도 브라우저로 이력서 못 올림</b></span></div>
+    <div class="fix"><b>수정</b> — 업로드도 api 경유(커밋 <code>0413840</code>). <code>presign-upload</code> 가 온프레면 api PUT URL(<code>/files/blob-put</code>, 1회용 티켓)을 주고 서버가 MinIO 에 저장. 다운로드도 blob 없으면 MinIO 서버측 스트리밍. AWS(실 S3)는 기존 그대로. <b>터널 실측: PUT 200, MinIO 저장·티켓 1회용 확인</b></div>
+  </div>
+
+  <div class="err" style="border-left-color:var(--good)">
+    <h3 style="color:var(--good)">2-7. STT/ViT GPU 이전 <span class="badge b-good">부하 대비 · 옵션 완료</span></h3>
+    <div class="kv"><span class="k">동기</span><span>"여러 명 동시 접속 시 터지나" — 8명 동시 부하테스트: 서버는 안 죽지만 STT 대기줄 <b>15→42초 증가</b>(CPU, <code>Semaphore(1)</code> 직렬화). 터짐이 아니라 느려짐</span>
+    <span class="k">결과</span><span>lie-detection GPU 변형 이미지(python:3.13-slim + torch cu124 + LD_LIBRARY_PATH) 빌드 + compose GPU 할당. 실측: 전사 <b>7.5초→~1초</b>, 8명 동시에도 <b>대기줄 0</b>, 정확도 동일. (커밋 안 함 — PC2 로컬 파일, 롤백 즉시)</span></div>
+  </div>
+
+  <div class="err">
+    <h3>2-8. 아르 채팅 이력서 접수(<code>create_application</code>) <span class="badge b-bad">폐쇄의 결정타</span></h3>
+    <div class="kv"><span class="k">증상</span><span>업로드는 성공했으나 접수에서 반복 실패 — "공고를 찾을 수 없습니다"(없는 posting_id) · "서버에 연결하지 못했습니다"</span>
+    <span class="k">원인</span><span><b>로컬 sLLM(qwen3 v9)이 다단계 도구 흐름을 못 지킴.</b> <code>list_postings</code> 로 실제 공고 id 를 확인하지 않고 <code>create_application</code> 을 한 번에 호출하며 posting_id 추측(rounds=1). 안내를 줘도 추측 반복</span>
+    <span class="k">판단</span><span>프롬프트/데이터로 매번 땜질해야 하는 로컬 모델 한계. <b>AWS 는 Claude 라 도구 체인을 안정 수행</b> → 이 부류 오류 없음 → 온프레 폐쇄 결정</span></div>
+  </div>
+
+  <h2><span class="n">3.</span>폐쇄 사유 (정리)</h2>
+  <div class="card">
+    <ol>
+      <li><b>로컬 sLLM 도구호출 불안정</b> — <code>create_application</code> 이 <code>list_postings</code> 건너뛰고 posting_id 추측. 채팅 접수·복잡 도구 흐름을 심사에서 신뢰 불가 (2-8)</li>
+      <li><b>브라우저↔내부 MinIO 불가</b> — 업로드/다운로드를 api 프록시로 우회(고쳤지만 온프레 고유 복잡도). AWS 는 실 S3 라 애초에 문제 없음 (2-5, 2-6)</li>
+      <li><b>온프레 고유 실패가 프리즈(09-20) 직전 누적</b> — 예시숫자 베끼기·JSON 따옴표·재기동 타이밍 등 전부 "AWS 에선 안 나던" 것들. 심사 안정성 최우선</li>
+      <li><b>결론</b> — 심사는 검증된 AWS 스택(Claude + 실 S3 + 관리형 인프라)에서 진행. 온프레는 발표 자료·학습 성과로 보존</li>
+    </ol>
+  </div>
+
+  <h2><span class="n">4.</span>AWS 전환 시 반영할 것</h2>
+  <div class="card">
+    <h3 style="margin-top:0">심사자용 데모 로그인</h3>
+    <ul>
+      <li><b>코드</b>: <code>Login.tsx</code>(데모 버튼 + <code>?demo=</code> 자동로그인) + 백엔드 <code>DEMO_LOCKED</code>(시연계정 비번/역할 잠금). → <b>Seuk-Team/Arda PR #333</b>(오너 허가). 머지 시 AWS auto-CD 배포</li>
+      <li><b>운영 전제(AWS DB)</b>: 심사자용 데모 계정(담당자·지원자)이 존재해야 하며, 로그인 화면의 데모 버튼으로 접속한다(자격증명은 이 문서에 남기지 않음) + <code>DEMO_LOCKED_EMAILS</code> env. 지원자 비번 로그인 백엔드는 이미 upstream 有</li>
+    </ul>
+  </div>
+
+  <h2><span class="n">5.</span>온프레미스에서 실제로 검증된 것 (성과)</h2>
+  <div class="card">
+    <p class="muted">프리즈 배포 자체는 <b>동작</b>했다 — 폐쇄는 "안 됨"이 아니라 "심사 안정성 대비 유지비용" 판단이다.</p>
+    <ul>
+      <li>자체 학습 sLLM(qwen3 + LoRA 3종)으로 요약·면접·채팅 구동</li>
+      <li>STT(faster-whisper) 실시간 전사 12/12 정확 · GPU 이전 시 8명 동시 대기줄 0</li>
+      <li>n8n 메일 파이프라인 실발송 · 이력서 Postgres 저장 + 티켓 스트리밍 · WebRTC 화상면접 · Cloudflare 터널 · Watchdog 자동복구</li>
+    </ul>
+  </div>
+
+  <footer>
+    Arda 온프레미스 종합보고 · 2026-09-18 · 이전 <code>Arda_온프레미스_구성보고_2026-09-16</code> · <code>심사기간_반영흐름_2026-09-17</code> 통합·대체 ·
+    상세 원문은 동명 <code>.md</code> 파일 참고
+  </footer>
+
+</div>
+</body>
+</html>

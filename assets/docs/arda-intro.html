@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Arda · 프로젝트 소개 (2026-09-17)</title>
+<style>
+:root {
+  --bg-0: #0a0d13;
+  --bg-1: #12161f;
+  --bg-2: #1a1f2b;
+  --bg-3: #232937;
+  --text: #e6e8ea;
+  --text-dim: #a8b0be;
+  --text-mute: #6b7484;
+  --border: #2a3140;
+  --border-soft: #1e2431;
+  --cyan: #22d3ee;
+  --blue: #60a5fa;
+  --violet: #a78bfa;
+  --green: #4ade80;
+  --amber: #fbbf24;
+  --pink: #f472b6;
+  --danger: #f87171;
+  --font: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+  --mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; background: var(--bg-0); color: var(--text); font-family: var(--font); font-size: 15px; line-height: 1.65; }
+main { max-width: 980px; margin: 0 auto; padding: 40px 24px 100px; }
+
+header.hero {
+  text-align: center;
+  padding: 48px 20px 40px;
+  background: radial-gradient(ellipse at center top, rgba(34, 211, 238, 0.08), transparent 60%),
+              radial-gradient(ellipse at center bottom, rgba(167, 139, 250, 0.06), transparent 60%);
+  border-radius: 16px;
+  margin-bottom: 32px;
+  border: 1px solid var(--border-soft);
+}
+.brand {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, var(--cyan), var(--blue), var(--violet));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+.tagline {
+  font-size: 20px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.by {
+  font-size: 13px;
+  color: var(--text-mute);
+  margin-top: 12px;
+  font-family: var(--mono);
+}
+
+h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 48px 0 16px;
+  letter-spacing: -0.015em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+h2 .icon { font-size: 22px; }
+h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; color: var(--text-dim); }
+
+p { color: var(--text); margin: 8px 0; }
+p.lead { font-size: 16.5px; color: var(--text-dim); }
+
+.card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin: 12px 0;
+}
+.card.soft {
+  background: var(--bg-1);
+  border-color: var(--border-soft);
+}
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 12px 0; }
+.three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 14px 0; }
+.four-col { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+@media (max-width: 720px) {
+  .two-col, .three-col, .four-col { grid-template-columns: 1fr; }
+}
+
+.feature {
+  padding: 20px;
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.feature .icon { font-size: 28px; display: block; margin-bottom: 8px; }
+.feature .name { font-weight: 700; margin-bottom: 4px; font-size: 15px; }
+.feature .desc { font-size: 13.5px; color: var(--text-dim); line-height: 1.55; }
+
+.flow {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px 0;
+}
+.flow-steps { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; justify-content: center; }
+.flow-step {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  border-radius: 8px;
+  min-width: 130px;
+  text-align: center;
+  font-size: 13.5px;
+}
+.flow-step .step-name { font-weight: 600; color: var(--text); }
+.flow-step .step-hint { font-size: 11.5px; color: var(--text-mute); margin-top: 2px; }
+.flow-arrow { color: var(--cyan); font-size: 20px; }
+
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+th { color: var(--text-mute); font-weight: 500; font-size: 12px; text-transform: uppercase; letter-spacing: 0.03em; }
+tr:last-child td { border-bottom: none; }
+td strong { color: var(--text); }
+
+code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; border-radius: 3px; font-size: 12.5px; color: var(--cyan); }
+.tag { display: inline-block; background: var(--bg-2); border: 1px solid var(--border); padding: 3px 9px; border-radius: 4px; font-size: 11.5px; margin: 2px 3px 2px 0; font-family: var(--mono); }
+.tag.cyan { color: var(--cyan); border-color: rgba(34, 211, 238, 0.4); }
+.tag.violet { color: var(--violet); border-color: rgba(167, 139, 250, 0.4); }
+.tag.green { color: var(--green); border-color: rgba(74, 222, 128, 0.4); }
+.tag.amber { color: var(--amber); border-color: rgba(251, 191, 36, 0.4); }
+
+.person {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+.person-name { font-weight: 700; font-size: 15.5px; }
+.person-role { font-size: 12.5px; color: var(--cyan); margin: 3px 0 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.person-what { font-size: 13px; color: var(--text-dim); line-height: 1.55; }
+
+.stack-item {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-align: center;
+  font-size: 13px;
+}
+.stack-item .stack-name { font-weight: 600; }
+.stack-item .stack-role { font-size: 11px; color: var(--text-mute); margin-top: 2px; }
+
+.big-quote {
+  border-left: 3px solid var(--violet);
+  padding: 4px 16px;
+  margin: 20px 0;
+  color: var(--text-dim);
+  font-size: 15px;
+  font-style: italic;
+}
+
+.number-hero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 24px 0;
+}
+.num-card {
+  background: var(--bg-1);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 14px;
+  text-align: center;
+}
+.num-card .num { font-size: 30px; font-weight: 800; font-family: var(--mono); background: linear-gradient(135deg, var(--cyan), var(--violet)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.num-card .num-label { font-size: 12px; color: var(--text-mute); margin-top: 4px; letter-spacing: 0.02em; }
+@media (max-width: 720px) { .number-hero { grid-template-columns: repeat(2, 1fr); } }
+
+.footer { text-align: center; color: var(--text-mute); font-size: 12.5px; margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); }
+.footer a { color: var(--cyan); text-decoration: none; }
+
+.q-section {
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), rgba(167, 139, 250, 0.04));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0;
+}
+
+.section-note { font-size: 13px; color: var(--text-mute); margin-top: 6px; }
+</style>
+</head>
+<body>
+<main>
+
+<header class="hero">
+  <div class="brand">Arda</div>
+  <div class="tagline">AI 채용 관리 시스템 · ATS with Agent</div>
+  <div style="font-size: 14px; color: var(--text-dim); max-width: 620px; margin: 16px auto 0;">
+    지원자 검색부터 서류 심사 · AI 면접 · 일정 조율 · 메일 발송까지<br>
+    채용 담당자 옆에 붙어 도와주는 <strong style="color: var(--cyan);">에이전트 아르</strong>가 있는 채용 도구
+  </div>
+  <div class="by">Team Seuk · 4명 · 2026년 여름 시작</div>
+</header>
+
+<div class="q-section" style="border-left: 4px solid var(--amber);">
+  <div style="font-family: var(--mono); font-size: 13px; color: var(--amber); letter-spacing: 0.04em; font-weight: 600;">● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</div>
+  <p style="margin-top: 8px; font-size: 14px; color: var(--text-dim); line-height: 1.7;">
+    <strong style="color: var(--amber);">이 소개서는 클라우드(AWS · <code>seuk.suvisdev.cloud</code>)에서 Anthropic Claude 기반으로 심사·운영하는 현재 기준으로 정리했다.</strong>
+    <b>메인 판단 엔진은 Anthropic Claude</b> — 서류 요약·평가·추천(3단 체인)·아르 도구 호출·FAQ 를 담당한다.
+    이유: 판단 품질·서비스 안정성·트래픽 대응(오토스케일). Qwen3 어댑터 3갈래는 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 남지만, 심사 서빙에는 클라우드 + Claude 를 쓴다.
+  </p>
+</div>
+
+<div class="q-section" style="border-left: 4px solid var(--cyan);">
+  <div style="font-family: var(--mono); font-size: 13px; color: var(--cyan); letter-spacing: 0.04em; font-weight: 600;">● 2026-09-17 갱신</div>
+  <p style="margin-top: 8px; font-size: 14px; color: var(--text-dim);">이 소개서 v1(2026-09-11) 이후 달라진 핵심:</p>
+  <ul style="font-size: 13.5px; color: var(--text-dim); line-height: 1.7; margin: 6px 0 0; padding-left: 18px;">
+    <li><strong style="color: var(--green);">클라우드(AWS)·Anthropic Claude 기반으로 심사·운영 확정</strong>(2026-09-18). 판단 품질·안정성·트래픽 대응이 이유. Qwen3 어댑터 3갈래 직접 학습(Colab QLoRA·R&D)도 완결(agent v9 pass_rate 73.9% · 17/23)했으나 심사 서빙에는 클라우드 + Claude 를 쓴다.</li>
+    <li><strong>헥사고날 부분 적용 완결</strong>(ADR-0035 · PR #184~#209) — 5개 Bounded Context + 포트/어댑터. 리팩터 후 전수 점검으로 고장 11건 발견·수정.</li>
+    <li><strong>STT는 OpenAI whisper-1 API로 면접 답변을 전사한다</strong>. 무음 hallucination 은 no_speech_prob 게이트로 완화(ADR-0038).</li>
+    <li><strong>신규 기능</strong> — 아르 챗 이력서 드래그·드롭 접수(#326), 같은 사람 재접수 이력서 변동 diff(#327), 탈락 축(서류/면접/종합) 빨간 표시(#328), 면접 중 실시간 분석 요약(#325).</li>
+    <li><strong>규모</strong> — 백엔드 테스트 1072개 · API 107개 · DB 테이블 28개 · ADR 38개 · 최신 PR #328. 제출 마감 <strong style="color: var(--amber);">2026-09-20</strong>(프리즈 태그 <code>hackathon-final-2026-09-20</code>).</li>
+  </ul>
+</div>
+
+<div class="number-hero">
+  <div class="num-card"><div class="num">1072</div><div class="num-label">백엔드 테스트</div></div>
+  <div class="num-card"><div class="num">107</div><div class="num-label">API 엔드포인트</div></div>
+  <div class="num-card"><div class="num">28</div><div class="num-label">DB 테이블</div></div>
+  <div class="num-card"><div class="num">38</div><div class="num-label">ADR</div></div>
+</div>
+
+<h2><span class="icon">📖</span> 무엇을 만드는가</h2>
+
+<div class="card">
+  <p class="lead">
+    <strong>Arda 는 채용 담당자를 위한 도구</strong>다. 지원자가 이력서·자기소개서를 내면, 담당자는 그 사람을 검토하고 · 면접 일정을 잡고 · 결과를 통보한다. 이 반복을 한 화면 안에서 끝내되, <strong style="color: var(--cyan);">AI 어시스턴트 아르</strong>가 옆에서 함께 판단한다.
+  </p>
+  <div class="big-quote">
+    "김도현 이력서 보여줘" · "이 사람 면접 단계로 옮겨" · "합격 안내 메일 초안 만들어줘"<br>
+    담당자가 이렇게 말하면 아르가 도구를 골라 실행하고, 판단이 필요한 것만 담당자에게 확인 카드로 되묻는다.
+  </div>
+</div>
+
+<h2><span class="icon">🎯</span> 핵심 기능 4가지</h2>
+
+<div class="two-col">
+  <div class="feature">
+    <span class="icon">💬</span>
+    <div class="name">아르 · AI 어시스턴트</div>
+    <div class="desc">담당자가 자연어로 요청 → 아르가 12개 도구 중 골라서 실행 (검색·상세·단계 변경·면접 배정·메일). <strong>쓰기 도구는 확인 카드로만</strong> 되돌릴 수 없는 실수를 막는다.</div>
+  </div>
+  <div class="feature">
+    <span class="icon">🎥</span>
+    <div class="name">AI 면접</div>
+    <div class="desc">지원자가 앱에서 답변 → STT 로 받아쓰기 · 표정(ViT)과 목소리(MFCC 등) 로 실시간 분석 · 담당자 화상 방에 진실/거짓 막대 · 표정 top-3 표시. <strong>판정 아니라 자료 정리</strong>.</div>
+  </div>
+  <div class="feature">
+    <span class="icon">📄</span>
+    <div class="name">서류 대조</div>
+    <div class="desc">지원자가 서류에 쓴 주장(수치·역할·기술)과 면접 답변을 나란히 놓고 <strong>일치·불일치·확인필요</strong> 로만 짝을 지어 준다. 판정은 사람 몫.</div>
+  </div>
+  <div class="feature">
+    <span class="icon">📅</span>
+    <div class="name">면접 일정 자동화</div>
+    <div class="desc">면접관 배정 → 가용 시간 확인 → 지원자에게 선택 링크 메일 → 클릭 한 번으로 확정. 담당자가 시간표 조율을 안 해도 됨.</div>
+  </div>
+</div>
+
+<h2><span class="icon">🔄</span> 지원자 흐름</h2>
+
+<div class="flow">
+  <div class="flow-steps">
+    <div class="flow-step"><div class="step-name">접수</div><div class="step-hint">applied</div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step"><div class="step-name">서류심사</div><div class="step-hint">screening</div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step"><div class="step-name">면접</div><div class="step-hint">interview</div></div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step"><div class="step-name">합격</div><div class="step-hint">accepted</div></div>
+  </div>
+  <p style="text-align: center; color: var(--text-mute); font-size: 13px; margin-top: 12px;">
+    한 칸씩 전진 · 어느 단계에서든 <span style="color: var(--danger);">불합격</span> 가능 · 최종 결정은 사람 (<code>ADR-0003</code>)
+  </p>
+</div>
+
+<h2><span class="icon">🖥️</span> 화면 구조</h2>
+
+<div class="card">
+  <table>
+    <tr><th>화면</th><th>무엇을 하나</th></tr>
+    <tr><td><strong>대시보드</strong></td><td>내 리뷰 대기·면접 진행·공고 미니 퍼널 등 요약 카드</td></tr>
+    <tr><td><strong>채용 공고</strong></td><td>공고 목록 · 클릭하면 그 공고의 지원자 화면</td></tr>
+    <tr><td><strong>공고의 지원자</strong></td><td><strong>본 작업 화면.</strong> 테이블 + 칸반 · 단계 변경 · 상세 사이드 패널 · 지원자 등록</td></tr>
+    <tr><td><strong>지원자 통합</strong></td><td>전 공고 통합 검색 (10만 건 대비 성능)</td></tr>
+    <tr><td><strong>캘린더</strong></td><td>확정된 면접 일정 · 월 그리드 · 내 면접만 필터</td></tr>
+    <tr><td><strong>평가 현황</strong></td><td>면접관 관점 · 평가 대기 큐</td></tr>
+    <tr><td><strong>설정</strong></td><td>계정 · 면접 가능 시간 · 사용자·권한(admin) · 메일 템플릿</td></tr>
+  </table>
+  <p class="section-note">사이드바 하단에 <strong>아르 정사각형</strong> — 어느 화면에서도 아르를 열어 대화 가능</p>
+</div>
+
+<h2><span class="icon">🤖</span> AI 모델 — 클라우드 + Anthropic Claude</h2>
+
+<div class="card">
+  <p style="margin-bottom: 12px; font-size: 14px; color: var(--text-dim);">
+    <strong style="color: var(--green);">아르는 Anthropic Claude 로 서빙된다 — 서류 요약·평가·추천(3단 체인), 도구 호출·꼬리질문, 지원자/담당자 FAQ 를 모두 Claude 가 담당한다.</strong>
+    비용 절감으로 기본·경계 질문은 캔드 응답($0) + 회사 프로필 근거. Qwen3 어댑터 3갈래(agent·summary·interview)는 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 남지만, 심사·운영 서빙 기준은 클라우드 + Claude 다.
+  </p>
+  <table>
+    <tr><th>역할</th><th>모델</th><th>측정·비고</th></tr>
+    <tr>
+      <td><strong>chat / agent (아르)</strong><br><span style="color: var(--text-mute); font-size: 12px;">도구 호출·꼬리질문</span></td>
+      <td><span class="tag violet">Anthropic Claude</span></td>
+      <td>도구 호출·꼬리질문·확인 카드를 Claude 로 서빙 · 안정적 다단계 도구 체인. R&D 로 학습한 Qwen3 <code>arda-agent</code> v9 는 도구 호출 pass_rate <b>73.9%</b>(17/23) 실측한 완결 자산</td>
+    </tr>
+    <tr>
+      <td><strong>summary (요약)</strong><br><span style="color: var(--text-mute); font-size: 12px;">이력서·면접 요약</span></td>
+      <td><span class="tag violet">Anthropic Claude</span></td>
+      <td>이력서·면접 요약을 Claude 3단 체인으로 산출(JSON·gist·key_skills) · R&D 로 학습한 Qwen3 <code>arda-summary</code> 전용 어댑터도 완결(career_years 인턴 포함 오차)</td>
+    </tr>
+    <tr>
+      <td><strong>interview (면접 chain)</strong><br><span style="color: var(--text-mute); font-size: 12px;">probe·findings·score</span></td>
+      <td><span class="tag violet">Anthropic Claude</span></td>
+      <td>probe · findings · findings_turn · score chain 을 Claude 가 담당 · R&D Qwen3 <code>arda-interview</code> 어댑터 완결</td>
+    </tr>
+    <tr>
+      <td><strong>전사 (STT)</strong><br><span style="color: var(--text-mute); font-size: 12px;">면접 답변 받아쓰기</span></td>
+      <td><span class="tag cyan">OpenAI Whisper API</span><br><span style="color: var(--text-mute); font-size: 12px;">(whisper-1)</span></td>
+      <td>OpenAI <code>whisper-1</code> API 로 면접 답변 전사 · 무음 hallucination 은 no_speech_prob 게이트로 완화(ADR-0038)</td>
+    </tr>
+    <tr>
+      <td><strong>표정</strong><br><span style="color: var(--text-mute); font-size: 12px;">얼굴 표정 7분류</span></td>
+      <td><span class="tag green">ViT</span> <code>arda-expression-vit</code></td>
+      <td>Google ViT 파인튜닝(Apache 2.0) · <b>UI 표시만, 판정 점수엔 미포함</b>(ADR-0029/0032)</td>
+    </tr>
+    <tr>
+      <td><strong>임베딩</strong><br><span style="color: var(--text-mute); font-size: 12px;">역량 기반 시맨틱 검색</span></td>
+      <td><span class="tag cyan">ko-sroberta-multitask</span></td>
+      <td>768차원 · pgvector</td>
+    </tr>
+  </table>
+  <p class="section-note"><strong>주의</strong> — 표정 신호는 채용 판정에 들어가지 않는다(AI 정책: 감정 인식 채용 활용 금지). 담당자 화면에 <b>자료로만</b> 표시. 프로덕션 lie-detection 은 여전히 t3.large CPU(int8)라 <code>VIT_MODEL</code> 미설정 시 표정 판정이 꺼져 있고, GPU 실측(Tesla T4)은 시연에서만.</p>
+</div>
+
+<h2><span class="icon">👥</span> 팀 · 4명</h2>
+
+<div class="three-col">
+  <div class="person">
+    <div class="person-name">suvisdev</div>
+    <div class="person-role">인프라·총괄 (팀장)</div>
+    <div class="person-what">AWS · 서버 · 자동 CD · <code>infra/</code> · <code>.github/</code> · 발표 총괄 · 클라우드 배포 전환 + Qwen3 어댑터 3갈래 QLoRA 학습(R&D) 완결</div>
+  </div>
+  <div class="person">
+    <div class="person-name">cloverky</div>
+    <div class="person-role">에이전트</div>
+    <div class="person-what"><code>backend/app/agent/</code> · 아르 도구 12종 · 프롬프트 관리 · 표정 ViT 학습 완료 (69.84%)</div>
+  </div>
+  <div class="person">
+    <div class="person-name">woojeongalex</div>
+    <div class="person-role">백엔드</div>
+    <div class="person-what">FastAPI · 상태 전환 로직 · 지원자 CRUD · 스키마 · 인터뷰방 실시간 분석 붙임</div>
+  </div>
+  <div class="person">
+    <div class="person-name">minahdev</div>
+    <div class="person-role">프론트엔드 + 앱</div>
+    <div class="person-what">React (담당자용 웹) + Flutter (지원자용 앱) 겸임 · 같은 API 두 클라이언트</div>
+  </div>
+</div>
+
+<h2><span class="icon">🛠️</span> 기술 스택</h2>
+
+<h3>백엔드</h3>
+<div class="four-col">
+  <div class="stack-item"><div class="stack-name">Python 3.13</div><div class="stack-role">runtime</div></div>
+  <div class="stack-item"><div class="stack-name">FastAPI</div><div class="stack-role">API</div></div>
+  <div class="stack-item"><div class="stack-name">SQLAlchemy</div><div class="stack-role">ORM</div></div>
+  <div class="stack-item"><div class="stack-name">Alembic</div><div class="stack-role">마이그레이션</div></div>
+  <div class="stack-item"><div class="stack-name">Anthropic Claude</div><div class="stack-role">메인 판단 엔진</div></div>
+  <div class="stack-item"><div class="stack-name">Ollama</div><div class="stack-role">Qwen3 어댑터 R&D</div></div>
+  <div class="stack-item"><div class="stack-name">JWT</div><div class="stack-role">인증</div></div>
+  <div class="stack-item"><div class="stack-name">pytest</div><div class="stack-role">테스트 1072개</div></div>
+</div>
+
+<h3>데이터</h3>
+<div class="four-col">
+  <div class="stack-item"><div class="stack-name">Postgres 16</div><div class="stack-role">주 DB</div></div>
+  <div class="stack-item"><div class="stack-name">pgvector</div><div class="stack-role">임베딩 검색</div></div>
+  <div class="stack-item"><div class="stack-name">S3 / MinIO</div><div class="stack-role">이력서 저장</div></div>
+  <div class="stack-item"><div class="stack-name">n8n + SMTP</div><div class="stack-role">메일(SQS 폐기)</div></div>
+</div>
+
+<h3>프론트 · 앱</h3>
+<div class="four-col">
+  <div class="stack-item"><div class="stack-name">React 18</div><div class="stack-role">웹 (담당자)</div></div>
+  <div class="stack-item"><div class="stack-name">TypeScript</div><div class="stack-role">타입 안정</div></div>
+  <div class="stack-item"><div class="stack-name">Vite</div><div class="stack-role">빌드</div></div>
+  <div class="stack-item"><div class="stack-name">CSS Modules</div><div class="stack-role">스타일</div></div>
+  <div class="stack-item"><div class="stack-name">Flutter 3.47</div><div class="stack-role">모바일 앱</div></div>
+  <div class="stack-item"><div class="stack-name">WebRTC</div><div class="stack-role">화상 면접</div></div>
+  <div class="stack-item"><div class="stack-name">Vercel</div><div class="stack-role">웹 배포</div></div>
+  <div class="stack-item"><div class="stack-name">Pretendard</div><div class="stack-role">폰트</div></div>
+</div>
+
+<h3>AI 서비스</h3>
+<div class="four-col">
+  <div class="stack-item"><div class="stack-name">Anthropic Claude</div><div class="stack-role">판단·요약·FAQ</div></div>
+  <div class="stack-item"><div class="stack-name">OpenAI Whisper API</div><div class="stack-role">STT(whisper-1)</div></div>
+  <div class="stack-item"><div class="stack-name">ViT (Google)</div><div class="stack-role">표정(표시만)</div></div>
+  <div class="stack-item"><div class="stack-name">MFCC + MLP</div><div class="stack-role">음성 지표</div></div>
+</div>
+
+<h3>인프라</h3>
+<div class="four-col">
+  <div class="stack-item"><div class="stack-name">AWS EC2 t3.large</div><div class="stack-role">서버</div></div>
+  <div class="stack-item"><div class="stack-name">AWS G4dn (T4)</div><div class="stack-role">시연 GPU</div></div>
+  <div class="stack-item"><div class="stack-name">Docker + Compose</div><div class="stack-role">컨테이너 6개</div></div>
+  <div class="stack-item"><div class="stack-name">Caddy 2</div><div class="stack-role">리버스 프록시</div></div>
+  <div class="stack-item"><div class="stack-name">systemd timer</div><div class="stack-role">자동 CD (2분)</div></div>
+  <div class="stack-item"><div class="stack-name">n8n</div><div class="stack-role">워크플로</div></div>
+  <div class="stack-item"><div class="stack-name">GitHub Actions</div><div class="stack-role">CI</div></div>
+  <div class="stack-item"><div class="stack-name">Certbot / TLS</div><div class="stack-role">SSL</div></div>
+</div>
+
+<h2><span class="icon">🌐</span> 어디서 도는가</h2>
+
+<div class="card">
+  <div class="two-col">
+    <div>
+      <h3>웹 (담당자)</h3>
+      <div><span class="tag cyan">seuk.suvisdev.cloud</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">Vercel Edge (인천 리전) · React SPA · main 머지 자동 배포</p>
+    </div>
+    <div>
+      <h3>API</h3>
+      <div><span class="tag violet">api.seuk.suvisdev.cloud</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">AWS EC2 t3.large · Docker 6 컨테이너 · main 머지 → 2분 후 재배포</p>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top: 8px;">
+    <div>
+      <h3>AI 판단 엔진</h3>
+      <div><span class="tag green">Anthropic Claude API</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">서류 요약·평가·추천 3단 체인 · 아르 도구 호출 · 지원자/담당자 FAQ · 기본·경계 질문 캔드 응답($0)</p>
+    </div>
+    <div>
+      <h3>모바일 (지원자)</h3>
+      <div><span class="tag green">arda.apk</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">Flutter · 사이드로드 · WebRTC 로 화상 면접</p>
+    </div>
+  </div>
+  <div class="two-col" style="margin-top: 8px;">
+    <div>
+      <h3>워크플로 · 메일</h3>
+      <div><span class="tag amber">seuk.suvisdev.cloud/n8n</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">n8n(지메일 SMTP) + 5분 SMTP 폴백 · Basic Auth · 팀 공유 (한 사람 오너 금지)</p>
+    </div>
+    <div>
+      <h3>제출 프리즈</h3>
+      <div><span class="tag cyan">hackathon-final-2026-09-20</span></div>
+      <p style="font-size: 13px; margin-top: 8px;">프리즈 태그 · 해커톤 제출 리포 보존 · Vercel 자동배포</p>
+    </div>
+  </div>
+</div>
+
+<h2><span class="icon">🎨</span> 디자인 — Deep Network</h2>
+
+<div class="card">
+  <p>
+    <strong>어두운 우주 바탕 위 시안 → 블루 → 바이올렛으로 흐르는 노드망.</strong>
+    로고는 노드 다섯 개와 그 연결선이 이루는 형태가 곧 <strong>A</strong> — 네트워크이면서 이니셜.
+    폰트는 <strong>Pretendard Variable</strong>(본문) + <strong>JetBrains Mono</strong>(숫자).
+  </p>
+  <p style="font-size: 13.5px; color: var(--text-mute); margin-top: 12px;">
+    2026-09-04 개정 — 그전에는 라이트 새싹 이었음. 마크의 의미(유기체)·색온도(웜)·재질(불투명 사각)이 화면(데이터망·쿨·전부 빛)과 어긋나 바꿈. 세 가지 모두 다 뒤집힘.
+  </p>
+</div>
+
+<h2><span class="icon">📌</span> 다른 채용 도구와 뭐가 다른가</h2>
+
+<div class="q-section">
+  <table>
+    <tr><th>차이</th><th>왜</th></tr>
+    <tr>
+      <td><strong>확인 카드로만 쓰기 도구가 실행</strong></td>
+      <td>단계 변경·메일 발송은 되돌리기 어렵다. 아르가 실수해도 담당자가 <strong>[취소] [확인]</strong> 을 눌러야만 실제 실행. AI 는 판단하지 않는다.</td>
+    </tr>
+    <tr>
+      <td><strong>답변별 서류 대조를 실시간으로</strong></td>
+      <td>지원자가 답변 하나 낼 때마다 서류 주장과 대조 → 담당자 화면에 즉시 "서류와 다름 · 서류와 맞음" 표시. 면접 도중 판단 근거가 눈앞에.</td>
+    </tr>
+    <tr>
+      <td><strong>이력서·자소서 무결성 앵커</strong></td>
+      <td>제출된 파일의 sha256 을 저장 → 나중에 파일이 바뀌면 "내용이 바뀜" 배지 뜸. 담당자가 위조 걱정 없이 봄 (<code>ADR-0028</code>).</td>
+    </tr>
+    <tr>
+      <td><strong>Anthropic Claude 3단 체인 · 비용 최적화</strong></td>
+      <td>서류 요약·평가·추천을 Claude 3단 체인으로 판단하고, 아르 도구 호출·지원자/담당자 FAQ 도 Claude 가 맡는다. 기본·경계 질문은 <strong>캔드 응답($0)</strong> + 회사 프로필 근거로 비용을 줄인다. Qwen3 어댑터 3갈래는 직접 학습(Colab QLoRA)한 완결 R&D 자산 (<code>ADR-0024</code>·<code>ADR-0032</code>).</td>
+    </tr>
+    <tr>
+      <td><strong>표정 · 음성을 판정 아니라 자료로</strong></td>
+      <td>ViT 표정 top-3, 진실/거짓 막대 를 담당자 화면에 <strong>보여만 준다.</strong> "AI가 거짓말 잡음" 아니라 "담당자가 볼 자료" — 마지막 결정은 사람.</td>
+    </tr>
+  </table>
+</div>
+
+<h2><span class="icon">📅</span> 지금 어디에 있는가</h2>
+
+<div class="card">
+  <p><strong>해커톤 제출 마감 · 2026-09-20 (D-3)</strong> · 프리즈 태그 <code>hackathon-final-2026-09-20</code></p>
+  <div class="three-col" style="margin-top: 16px;">
+    <div>
+      <h3>완료 (기반)</h3>
+      <ul style="font-size: 13.5px; color: var(--text-dim); padding-left: 18px; margin: 0;">
+        <li>기본 CRUD · 인증</li>
+        <li>아르 도구 12종</li>
+        <li>AI 면접 실시간 분석 (표정·음성)</li>
+        <li>답변별 서류 대조 · 목소리 지표 (#175)</li>
+        <li>서명 원장 (제출물 무결성)</li>
+        <li>ViT 표정 학습 · UI 표시</li>
+      </ul>
+    </div>
+    <div>
+      <h3>완료 (09-13~17 추가)</h3>
+      <ul style="font-size: 13.5px; color: var(--green); padding-left: 18px; margin: 0;">
+        <li><b>Qwen3 어댑터 3갈래 직접 학습(R&D) 완결</b> (agent v9 pass_rate 73.9%) · 심사 서빙은 클라우드 Anthropic Claude 로 확정</li>
+        <li><b>헥사고날 부분 적용 완결</b> (ADR-0035 · PR #184~#209) · 전수 점검 고장 11건 수정</li>
+        <li>이력서 드래그·드롭 접수(#326) · 변동 diff(#327) · 탈락 축 빨간 표시(#328)</li>
+        <li>면접 중 실시간 분석 요약(#325) · 종합 점수 타일 강조(#322)</li>
+        <li>운영 리허설(우정 09-17): 전체 흐름 13분 무중단 · 얼굴 인식 86% · 메일 4통</li>
+      </ul>
+    </div>
+    <div>
+      <h3>남은 것</h3>
+      <ul style="font-size: 13.5px; color: var(--text-mute); padding-left: 18px; margin: 0;">
+        <li>발표 리허설 · PPT 12장(다크) 마무리</li>
+        <li>STT whisper-1 무음 hallucination 완화 (no_speech_prob 게이트, 현재 whisper-1 API 운영)</li>
+        <li>표정 판정 벡터 이관 (프로덕션 100차원 · GPU 승격 시 107차원)</li>
+        <li>요약 어댑터 career_years 인턴 포함 오차 보정</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div>Team Seuk · <a href="https://github.com/Seuk-Team/Arda">github.com/Seuk-Team/Arda</a> · <a href="https://seuk.suvisdev.cloud">seuk.suvisdev.cloud</a></div>
+  <div style="margin-top: 6px;">소개서 v1(2026-09-11) → <strong>2026-09-17 갱신</strong> · 상세는 <code>docs/00_overview/</code> 참조</div>
+</div>
+
+</main>
+</body>
+</html>

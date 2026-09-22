@@ -1,0 +1,562 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arda 기술 해부 노트 — 2026-09-17 갱신판</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700;800&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --paper:#F3F5F8; --card:#FFFFFF; --ink:#1B2230; --muted:#5E6878; --line:#D6DCE5; --line-soft:#E6EAF0;
+  --front:#2F5FD6; --api:#157A5C; --ai:#7A46C9; --infra:#B4661A; --pink:#BE185D;
+  --front-bg:#E8EEFB; --api-bg:#E4F3EC; --ai-bg:#F0E8FA; --infra-bg:#FAEEDF; --pink-bg:#FCE7F3;
+  --warn:#B3261E; --warn-bg:#FBE9E7; --code-bg:#E9EDF3;
+  --new-bg:#E7F7EC; --new:#15803D;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#12161D; --card:#1A2029; --ink:#E3E8F0; --muted:#98A2B3; --line:#2A323E; --line-soft:#222A35;
+    --front:#7C9CF2; --api:#4FC39C; --ai:#B98BEA; --infra:#E0A257; --pink:#F072B6;
+    --front-bg:#1D2740; --api-bg:#18302A; --ai-bg:#2A2138; --infra-bg:#33281A; --pink-bg:#3B1C2A;
+    --warn:#F08A82; --warn-bg:#3A1F1D; --code-bg:#222A36;
+    --new-bg:#1E3327; --new:#4FC39C;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;font-size:16px;line-height:1.8;word-break:keep-all}
+.wrap{max-width:860px;margin:0 auto;padding:44px 20px 100px}
+h1,h2,h3{font-family:"Gothic A1","Noto Sans KR",sans-serif;text-wrap:balance;line-height:1.3}
+h1{font-size:2.2rem;font-weight:800;margin:.3rem 0 .6rem;letter-spacing:-.01em}
+h2{font-size:1.45rem;font-weight:800;margin:3.6rem 0 .4rem;padding-top:1.2rem;border-top:2px solid var(--ink)}
+h2 small{display:block;font-family:"Noto Sans KR",sans-serif;font-size:.85rem;font-weight:400;color:var(--muted);margin-top:.2rem}
+h3{font-size:1.12rem;font-weight:700;margin:0 0 .2rem}
+p{margin:.5rem 0;max-width:70ch}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+.lede{color:var(--muted);max-width:66ch}
+.meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:.78rem;color:var(--muted)}
+code,pre{font-family:"IBM Plex Mono",ui-monospace,monospace}
+code{background:var(--code-bg);border-radius:4px;padding:1px 6px;font-size:.82em}
+pre{background:var(--code-bg);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:.78rem;line-height:1.6;margin:.5rem 0}
+pre code{background:none;padding:0;font-size:inherit}
+pre .f{display:block;color:var(--muted);font-size:.72rem;margin-bottom:6px}
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 6px}
+nav.toc a{font-size:.78rem;font-weight:500;color:var(--ink);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--card)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--front);color:var(--front);outline:none}
+a{color:var(--front)}
+.tag{display:inline-block;font-family:"IBM Plex Mono",monospace;font-size:.66rem;font-weight:600;border-radius:4px;padding:1px 7px;vertical-align:2px;margin-right:6px;white-space:nowrap}
+.t-front{color:var(--front);background:var(--front-bg)}
+.t-api{color:var(--api);background:var(--api-bg)}
+.t-ai{color:var(--ai);background:var(--ai-bg)}
+.t-infra{color:var(--infra);background:var(--infra-bg)}
+.t-new{color:var(--new);background:var(--new-bg)}
+.t-hot{color:var(--pink);background:var(--pink-bg)}
+.tech{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 22px;margin:18px 0;border-left-width:5px}
+.tech.l-front{border-left-color:var(--front)}
+.tech.l-api{border-left-color:var(--api)}
+.tech.l-ai{border-left-color:var(--ai)}
+.tech.l-infra{border-left-color:var(--infra)}
+.tech.l-hot{border-left-color:var(--pink)}
+.tech .one{color:var(--muted);margin:0 0 .8rem;font-size:.95rem}
+.tech dl{display:grid;grid-template-columns:88px 1fr;gap:8px 16px;margin:0;font-size:.93rem}
+.tech dt{font-size:.7rem;font-weight:700;letter-spacing:.06em;color:var(--muted);padding-top:5px}
+.tech dd{margin:0;max-width:72ch}
+.tech dd ul{margin:2px 0;padding-left:18px}
+.tech dd li{margin:3px 0}
+.tech dd p{margin:.25rem 0}
+.tablewrap{overflow-x:auto;margin:.6rem 0}
+table{border-collapse:collapse;width:100%;font-size:.84rem}
+th{font-size:.7rem;letter-spacing:.06em;color:var(--muted);text-align:left;border-bottom:2px solid var(--line);padding:6px 8px;white-space:nowrap}
+td{border-bottom:1px solid var(--line-soft);padding:7px 8px;vertical-align:top}
+.num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+.note{border-left:3px solid var(--front);background:var(--front-bg);padding:10px 14px;border-radius:0 8px 8px 0;font-size:.9rem;margin:1rem 0;max-width:72ch}
+.note.warn{border-color:var(--warn);background:var(--warn-bg)}
+.note.hot{border-color:var(--pink);background:var(--pink-bg)}
+.note.new{border-color:var(--new);background:var(--new-bg)}
+.hero{background:var(--pink-bg);border-left:5px solid var(--pink);border-radius:0 8px 8px 0;padding:14px 18px;margin:14px 0}
+.hero b{color:var(--pink)}
+@media (max-width:600px){.tech dl{grid-template-columns:1fr}.tech dt{padding-top:10px}}
+</style>
+</head>
+<body>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Seuk-Team · Arda ATS · <b>2026-09-17 갱신판</b></div>
+  <h1>Arda 기술 해부 노트</h1>
+  <p class="lede">09-10 오전 해부노트에 <b>오후~저녁 인터뷰방 대공사</b>를 반영한 갱신판. 이 문서는 새로 만들어지거나 크게 바뀐 기술만 다룬다. 오전 노트의 나머지 기술(FastAPI · SQLAlchemy · alembic · PostgreSQL+pgvector · JWT · S3 · 메일 파이프라인 · 해시 사슬 · 인프라 · 클라이언트 등)은 그대로 유효하다. 여기에는 <b>오늘 오후 이후 코드가 바뀐 자리만</b> 정리한다.</p>
+  <div class="meta"><span>저장소 <code>Seuk-Team/Arda</code></span><span>서비스 <code>seuk.suvisdev.cloud</code></span><span>오늘 머지 PR <b>13</b>건</span></div>
+  <nav class="toc" aria-label="목차">
+    <a href="#s0">0. 오늘 저녁 · 한눈에</a><a href="#s1">1. 자동 질문 생성</a><a href="#s2">2. 꼬리질문 백그라운드</a><a href="#s3">3. ViT 표정 파이프라인</a><a href="#s4">4. STT 180초</a><a href="#s5">5. 세션 삭제</a><a href="#s6">6. 불합격 사유 UI</a><a href="#s7">7. 배포 · torch CPU-only</a><a href="#s8">8. ADR-0028 §1.7</a><a href="#s9">9. 잠긴 원장 뚫기</a>
+  </nav>
+</header>
+<div class="note new" style="margin:16px 0"><b>2026-09-17 갱신 · 이 문서(09-10 저녁 인터뷰방 기록)를 최신으로 맞춘 요점</b><br>
+① <b>헥사고날 부분 적용 완결</b> — ADR-0035 · PR #184~#209 · 5개 Bounded Context(application·interview·hiring·talent·shared) + 포트/어댑터. <b>Full DDD 아님.</b> 이관 직후 전수 점검에서 <b>테스트는 전부 초록인데 실제로 깨져 있던 고장 11건</b>을 찾아 고쳤다(배포 진입점·함수 안 import·로그 경로가 사각지대). 상세는 자매 문서 「아키텍처 리팩터 보고서 2026-09-17」.<br>
+② <b>클라우드 서빙 확정</b> — 판단 엔진은 AWS 위에서 Anthropic Claude 로 서빙한다. 서류 요약·평가·추천(3단 체인) · 아르 에이전트 도구 호출 · 지원자/담당자 FAQ 를 모두 Claude 가 담당한다. 사내에서 학습했던 Qwen3 어댑터(agent v9 등)는 완결된 R&D 자산으로 남는다. 아래 본문의 "Claude Haiku 콜당 비용" 류 서술은 작성 시점 기록이다.<br>
+③ <b>STT 경로</b> — OpenAI whisper-1 실시간 전사(ADR-0038)로 서빙한다. 무음 구간 hallucination 은 <code>no_speech_prob</code> 게이트로 완화했다. 로컬 faster-whisper large-v3-turbo 경로는 폴백으로 코드에 남아 있고 실측 당시의 기록으로 §4 에 둔다. §4 참조.<br>
+④ <b>결정</b> — ADR-0036 SQS 워커 폐기 · ADR-0037 회사 통합 API · ADR-0038 실시간 전사. <b>규모(09-17 실측)</b>: 백엔드 테스트 <b>1072개</b> · API <b>107개</b> · DB 테이블 <b>28개</b> · ADR <b>0001~0038</b> · 최신 PR <b>#328</b>.</div>
+<div class="note warn" style="margin:16px 0"><b>2026-09-12 · 이 문서의 코드 경로가 바뀌었다</b><br>
+ADR-0035 헥사고날 부분 적용(PR #184~#209)으로 <code>backend/app/</code> 이 Bounded Context 폴더로 재편됐다. <b>옛 경로로 import 하면 <code>ModuleNotFoundError</code></b> 가 난다. 아래 본문의 파일 경로는 작성 시점 기록으로 읽고, 실제 위치는 이 표로 환산한다:<br>
+<code>app/api/interviews.py</code> → <b><code>app/interview/api/interviews.py</code></b> ·
+<code>app/api/internal.py</code> → <b><code>app/shared/api/internal.py</code></b> ·
+<code>app/api/agent.py</code> → <b><code>app/application/api/agent.py</code></b> ·
+<code>app/screening.py</code> → <b><code>app/application/screening.py</code></b> ·
+<code>app/mail.py</code> → <b><code>app/shared/mail.py</code></b> ·
+<code>app/models.py</code> → <b><code>app/models/</code></b>(6파일 · import 경로는 그대로)<br>
+<span style="font-size:.88em">또한 면접 세션 로직 일부가 서비스로 분리됐다: <code>_seed_questions_bg</code>·<code>_generate_followup_bg</code> → <b><code>app/interview/session_service.py</code></b>, 일정 후보·제안 → <b><code>app/interview/schedule_service.py</code></b>.
+<b>동작 변경(09-12)</b>: 사전 질문 10개 → <b>4개</b>(<code>MAX_SEED_QUESTIONS</code>) · 꼬리질문 <b>최대 3개</b>(<code>MAX_FOLLOWUPS_PER_SESSION</code>, 이전엔 상한 없음) · 세션 삭제 시 <b>그 면접방 WebSocket 을 닫고 이유를 통보</b>(이전엔 좀비로 남았다) · 꼬리질문 생성 상한 1200→2400 + 잘린 응답에서 완성된 주장 건지기. 전체는 바탕화면 <code>백엔드_구조_이관_및_점검_2026-09-12.md</code> C부.</span></div>
+
+<!-- ═══════════════════ 0. 한눈에 ═══════════════════ -->
+<section id="s0">
+<h2>0. 오늘 저녁 · 한 눈에<small>PR 13개가 하루 오후~저녁에 · 인터뷰방을 시연 가능한 완성도로</small></h2>
+
+<div class="hero"><b>서사</b> — 아침엔 fit-check 24명이 옛 자소서로 접수돼 있었다. 저녁까지 <b>인터뷰 흐름 5개 축이 모두 자동화 · 표정 · 판정 근거</b> 를 갖추게 했다. 그 사이 배포 파이프라인이 며칠째 죽어 있던 것을 <b>디스크 확장 + torch CPU-only</b> 두 갈래로 되살렸고, ADR-0028 무결성 원장을 실제로 한 번 뚫었다가 "우회의 흔적을 남긴다" 절을 문서에 새로 얹었다.</div>
+
+<div class="tablewrap"><table>
+<tr><th>PR</th><th>바뀐 파일</th><th>한 줄</th><th>화면 결과</th></tr>
+<tr><td>#161</td><td><code>mobile/lib/screens/applicant_shell.dart</code></td><td>재발급 세션에서 <b>새 것부터</b> pick — <code>reversed</code> 로 훑는다</td><td>어제 사고("담당자 새 방인데 앱은 옛 방") 재발 방지</td></tr>
+<tr><td>#162</td><td><code>ai/lie-detection/Dockerfile</code> + <code>infra/docker-compose.prod.yml</code> + <code>backend/.env.example</code></td><td>ViT 활성화 — <code>VIT_MODEL=cloverky/arda-expression-vit</code> + torch 계열 설치</td><td>프로덕션에 ViT 로드됨</td></tr>
+<tr><td>#163</td><td><code>backend/app/api/interviews.py</code>, <code>agent/interview_probe.py</code>, alembic <code>0017</code></td><td>답변 뒤 <b>백그라운드로 꼬리질문 하나 더</b></td><td>담당자 화면에 🤖 자동 배지</td></tr>
+<tr><td>#165</td><td><code>ai/lie-detection/feature_extractor.py</code>, <code>interview_ws.py</code>, <code>app.py</code> + 프론트 <code>useLiveAnalysis.ts</code>, <code>InterviewRoom.tsx</code></td><td>표정 top-3 를 실시간 분석 판넬에 렌더</td><td>판정 옆 "우리 ViT · 판정엔 안 들어감" 블록</td></tr>
+<tr><td>#166</td><td><code>backend/app/api/interviews.py</code></td><td>세션 생성 시 <b>자동 질문 10개</b> 훅</td><td>담당자 질문 입력 필요 없음</td></tr>
+<tr><td>#167</td><td>프론트 <code>ApplicantPanel.tsx</code>, <code>types.ts</code>, module.css</td><td>자동 불합격 사유 블록</td><td>아르 요약 아래 판정 근거</td></tr>
+<tr><td>#168</td><td><code>backend/app/api/interviews.py</code> + 프론트</td><td>세션 <b>삭제 API + 버튼</b></td><td>담당자가 옛 세션 정리</td></tr>
+<tr><td>#169</td><td><code>ai/lie-detection/requirements-vit.txt</code></td><td>torch <b>CPU-only 인덱스</b></td><td>이미지 5GB 감소</td></tr>
+<tr><td>#170</td><td><code>ai/lie-detection/requirements-vit.txt</code></td><td>torchvision <code>+cpu</code> pin 해제 (yanked 회피)</td><td>빌드 성공</td></tr>
+<tr><td>#171</td><td><code>backend/app/api/interviews.py</code></td><td>자동 질문 도중 세션 삭제 → <b>조용히 취소</b></td><td>500 대신 로그만</td></tr>
+<tr><td>#172</td><td><code>ai/lie-detection/interview_ws.py</code></td><td>STT 상한 45s → <b>180s</b></td><td>3분 답변 텍스트 저장</td></tr>
+<tr><td>#173</td><td><code>docs/03_decision/0028-제출물-무결성-앵커.md</code></td><td>ADR §1.7단계 — 우회의 흔적을 남기는 세 갈래</td><td>—</td></tr>
+</table></div>
+</section>
+
+<!-- ═══════════════════ 1. 자동 질문 ═══════════════════ -->
+<section id="s1">
+<h2>1. 세션 생성 시 자동 질문 훅<small>담당자가 매번 텍스트로 넣던 자리를 없앤다</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">신규</span>_seed_questions_bg — 자소서·이력서·공고에서 꼬리질문 10개</h3>
+<p class="one">세션 생성 API 응답을 지연시키지 않고 뒤에서 도는 BackgroundTask. LLM 3~5초, 그 사이 담당자는 이미 링크 복사 화면.</p>
+<dl>
+<dt>왜 필요</dt><dd>ADR-0026 §5-5 지시서에 자동 질문 생성이 설계돼 있었지만, 그동안은 <b>담당자가 손으로 텍스트에어리어에 넣어야</b> 지원자가 시작할 수 있었다. Daniel Kim · 류성민 처럼 자소서가 이미 있는 지원자에게 담당자가 매번 같은 작업을 반복.</dd>
+<dt>어디에</dt><dd><code>backend/app/api/interviews.py</code> · <code>_seed_questions_bg(session_id)</code> · <code>create_session</code> 이 <code>background.add_task(_seed_questions_bg, session.id)</code> 로 훅.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">backend/app/api/interviews.py — 흐름 요약</span><code>def _seed_questions_bg(session_id: int) -&gt; None:
+    with SessionLocal() as db:
+        session = db.get(InterviewSession, session_id)
+        if session is None: return
+        existing = db.scalar(select(InterviewTurn).where(InterviewTurn.session_id == session_id))
+        if existing is not None: return       # 담당자가 수동으로 먼저 넣었으면 존중
+
+        application = db.get(Application, session.application_id)
+        sources = sources_of(application, db)  # 자소서 · 이력서 · 공고 요건 재료
+        claims = generate_probes(sources)      # LLM 이 5주장 × 2질문 뽑는다
+
+        questions = []
+        if claims:
+            # 주장별 첫 질문을 먼저 · 그다음 둘째 (같은 주장 질문이 붙지 않게 재조립)
+            for i in range(2):
+                for c in claims:
+                    qs = c.get("questions") or []
+                    if i &lt; len(qs): questions.append(qs[i].strip())
+            questions = questions[:10]
+
+        if not questions:
+            questions = ["성함과 지원하신 직무를 말씀해 주세요.",
+                         "가장 자신 있는 기술 하나만 말씀해 주세요.",
+                         "입사하면 가장 먼저 하고 싶은 일은 무엇인가요?"]
+
+        if db.get(InterviewSession, session_id) is None:  # #171: 그 사이 삭제됐으면 조용히
+            return
+        for seq, q in enumerate(questions, start=1):
+            db.add(InterviewTurn(session_id=session_id, seq=seq, question=q))
+        try: db.commit()
+        except Exception: db.rollback(); return</code></pre></dd>
+<dt>정책</dt><dd><ul>
+<li><b>주장별 첫 질문을 먼저</b> 뽑아 다양성 확보. 같은 주장의 두 질문이 붙어 나가면 지원자가 지루하다.</li>
+<li><b>담당자가 이미 넣은 세션은 건드리지 않음</b> (existing 검사).</li>
+<li><b>폴백 3개</b> 는 어느 지원자에게든 물을 수 있는 안전한 첫 세 개.</li>
+<li>실패해도 무해 — 로그만 남기고 세션은 그대로 (담당자가 수동으로 넣을 수 있음).</li></ul></dd>
+<dt>실측</dt><dd>Daniel Kim 세션 49: 8개 질문 자동 생성. <code>generate_probes</code> 가 이력서의 asyncio·WebSocket·JWT·pytest 커버리지 클레임을 잡아 각각 꼬리질문화. LLM 응답 시간 약 4초.</dd>
+<dt>주의</dt><dd>#171 로 해결된 레이스 — LLM 이 도는 사이 담당자가 세션을 삭제하면 INSERT 가 FK 위반. 지금은 재확인 + try/except 로 조용히 취소.</dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 2. 꼬리질문 ═══════════════════ -->
+<section id="s2">
+<h2>2. 답변 뒤 꼬리질문 · 비동기 삽입<small>지원자 대기 0초. 다음 질문 답변 중에 뒷 자리에 삽입</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">신규</span>_generate_followup_bg — 답변 저장 뒤 백그라운드로 하나 더</h3>
+<p class="one">답변 저장 직후 백그라운드 태스크. LLM 5~8초 걸리는 동안 지원자는 이미 미리 준비된 다음 질문 답변 중이라 <b>지연 노출 0</b>.</p>
+<dl>
+<dt>왜 필요</dt><dd>실시간 꼬리질문을 답변 완료 직후 <b>동기</b> 로 만들면 지원자가 8~12초 대기(STT 3~6초 + LLM 5초). 팀장 결정 — <b>비동기 삽입식</b> 으로 자연스러운 흐름.</dd>
+<dt>어디에</dt><dd><code>backend/app/agent/interview_probe.py</code> · <code>probe_from_answer(prev_question, prev_answer, applicant_summary)</code> · <code>backend/app/api/interviews.py</code> <code>submit_answer</code> 가 백그라운드로 호출.</dd>
+<dt>alembic</dt><dd><code>0017_followup_questions.py</code> — <code>interview_turns.generated_from_turn_id BIGINT NULL</code> · self FK, ondelete=SET NULL.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">backend/app/agent/interview_probe.py:probe_from_answer</span><code>FOLLOWUP_MIN_ANSWER_CHARS = 20   # 짧은 답변은 억지로 꼬리 뽑지 않는다
+FOLLOWUP_MAX_TOKENS = 200
+
+def probe_from_answer(prev_question, prev_answer, applicant_summary="") -&gt; str | None:
+    if len(prev_answer.strip()) &lt; FOLLOWUP_MIN_ANSWER_CHARS:
+        return None
+    backend = get_summary_backend()
+    if backend.unavailable_reason(): return None
+
+    prompt = (
+        "면접 진행자다. 방금 지원자가 답한 것을 재료로 **한 문장 짜리 꼬리 질문**을 만든다.\n"
+        "- 답변에서 지원자가 실제로 한 말을 근거로 삼는다\n"
+        "- 추궁이 아니라 지원자가 세부를 펼칠 자리를 만든다\n"
+        "- 60자 이내 · 물음표로 끝난다\n"
+        "- 감상·다짐만 있어 물을 세부가 없으면 `SKIP`\n\n"
+        f"[지원자 요약]\n{applicant_summary}\n\n[직전 질문]\n{prev_question}\n\n[지원자 답변]\n{prev_answer}\n\n[꼬리 질문]"
+    )
+    result = backend.complete(prompt=prompt, max_tokens=FOLLOWUP_MAX_TOKENS)
+    text = result.text.strip()
+    # ```..``` · 앞뒤 따옴표 벗기기 · SKIP 처리 · 250자 초과 폐기
+    ...
+    return text or None</code></pre>
+<pre><span class="f">DB 삽입 · seq = max+1 로 뒤에 붙는다</span><code>max_seq = (db.query(InterviewTurn.seq).filter(InterviewTurn.session_id == session_id)
+             .order_by(InterviewTurn.seq.desc()).limit(1).scalar() or 0)
+db.add(InterviewTurn(session_id=session_id, seq=max_seq + 1,
+                     question=question,
+                     generated_from_turn_id=prev_turn_id))</code></pre></dd>
+<dt>UI 표시</dt><dd><code>frontend/app/src/pages/InterviewWatch.tsx</code> 가 <code>generated_from_turn_id != null</code> 이면 🤖 배지. 담당자가 자동 생성인지 바로 판독.</dd>
+<dt>정책</dt><dd><ul>
+<li><b>20자 미만 답변은 즉시 None</b>. "파이썬입니다" 같은 짧은 답변에 억지 꼬리 붙이면 면접관에게 해롭다 (interview_probe.py 원본 정책 그대로).</li>
+<li><b>SKIP · 감상만 있으면 뽑지 않는다</b> — LLM 이 SKIP 을 반환하면 취소.</li>
+<li><b>250자 초과는 다듬어도 못 살림</b>. 프롬프트를 뚫고 큰 응답이 온 경우.</li></ul></dd>
+<dt>비용</dt><dd><span class="tag t-new">09-18 갱신</span> 꼬리질문 생성은 클라우드 Anthropic Claude 가 서빙한다 — 09-11 실측 기준 콜당 ~2.5원 · 면접당 5~8콜 → 15~20원/면접. 비용 절감을 위해 기본·경계 질문은 캔드 응답($0) + 회사 프로필 근거로 처리해 콜 수를 줄인다. 사내에서 학습했던 Qwen 어댑터(agent·summary·interview)는 완결된 R&D 자산으로 남는다.</dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 3. ViT 파이프라인 ═══════════════════ -->
+<section id="s3">
+<h2>3. ViT 표정 실시간 파이프라인<small>얼굴 → 크롭 → ViT → top-3 → WS → UI</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">신규</span>expressions_from_frame — 프레임 하나로 표정 top-K</h3>
+<p class="one">한 장 BGR 프레임에서 얼굴을 검출하고 크롭하고 ViT 로 표정 확률을 뽑아 top-K 리스트를 돌려준다. VIT_MODEL 이 꺼져 있으면 None (무해).</p>
+<dl>
+<dt>어디에</dt><dd><code>ai/lie-detection/feature_extractor.py</code> · 새 함수 <code>expressions_from_frame(frame, top_k=3)</code>. 라벨은 모델의 <code>id2label</code>(영어) + 담당자용 한국어 매핑.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">feature_extractor.py — 한국어 라벨 매핑</span><code>_EXPRESSION_KO = {
+    "angry":"화남", "disgust":"역겨움", "fear":"무서움",
+    "happy":"웃음", "sad":"슬픔", "surprise":"놀람", "neutral":"무표정",
+}
+
+def expressions_from_frame(frame, top_k: int = 3) -&gt; list[dict] | None:
+    if not VIT_MODEL: return None
+    lm, rgb = _detect(frame)             # mediapipe · 얼굴 랜드마크
+    if lm is None: return None
+    crop = _crop_of(lm, rgb)             # 랜드마크 덮는 사각형만
+    if crop is None: return None         # &lt; 60px 면 폐기
+    probs = expression_rows([crop])      # ViT 로 7종 확률
+    if not len(probs): return None
+    labels = _vit_labels()               # id2label
+    row = probs[0]
+    order = np.argsort(row)[::-1][:top_k]
+    return [{"label": labels[int(i)],
+             "label_ko": _EXPRESSION_KO.get(labels[int(i)].lower(), labels[int(i)]),
+             "prob": round(float(row[i]), 3)} for i in order]</code></pre>
+<pre><span class="f">interview_ws.py:LiveScorer — 최근 프레임 하나 캐시</span><code>class LiveScorer:
+    def __init__(self, ...):
+        ...
+        self._latest_frame = None       # ViT 판정용 · 한 장만
+    def add_frame(self, bgr) -&gt; None:
+        self._latest_frame = bgr        # 얼굴 잡힐 때마다 갱신
+    def snapshot(self):
+        return bytes(self._pcm), [r for _, r in self._rows], self._latest_frame</code></pre>
+<pre><span class="f">interview_ws.py:score — 판정 옆에 표정 붙임</span><code>def score(pcm, rows, seconds, latest_frame=None) -&gt; dict:
+    ...
+    # 표정: 프레임이 있고 VIT_MODEL 이 켜져 있을 때만
+    expressions = None
+    if latest_frame is not None:
+        try:    expressions = expressions_from_frame(latest_frame, top_k=3)
+        except: logger.exception("표정 판정 실패 — 판정은 그대로 낸다")
+
+    out = {"ok": True, "pred": int(...), "truth_pct": ..., "lie_pct": ...,
+           "signals": face_signals(arr, seconds)}
+    if expressions: out["expressions"] = expressions
+    return out</code></pre></dd>
+<dt>프론트 렌더</dt><dd>
+<pre><span class="f">frontend/app/src/pages/useLiveAnalysis.ts — 파싱</span><code>export type Expression = { label: string; label_ko: string; prob: number }
+export type LiveVerdict = {
+  truth_pct?: number; lie_pct?: number;
+  signals?: FaceSignal[];
+  expressions?: Expression[];       // 신규
+  reason?: string; at: number;
+}
+// onmessage 에서: expressions: Array.isArray(m.expressions) ? m.expressions : undefined,</code></pre>
+<pre><span class="f">InterviewRoom.tsx — 판정 옆에 top-3 블록</span><code>{analysis.latest.expressions?.length ? (
+  &lt;div className={styles.expressions}&gt;
+    &lt;p className={styles.expressionsLabel}&gt;표정 (우리 ViT · 판정엔 안 들어감)&lt;/p&gt;
+    &lt;ul className={styles.expressionsList}&gt;
+      {analysis.latest.expressions.slice(0, 3).map((ex) =&gt; (
+        &lt;li key={ex.label} className={styles.expressionRow}&gt;
+          &lt;span className={styles.expressionName}&gt;{ex.label_ko || ex.label}&lt;/span&gt;
+          &lt;span className={styles.expressionPct}&gt;{Math.round(ex.prob * 100)}%&lt;/span&gt;
+        &lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  &lt;/div&gt;
+) : null}</code></pre></dd>
+<dt>왜 판정엔 안 들어가나</dt><dd><code>model.pkl</code> 이 100차원 (음성 86 + mediapipe 14) 으로 학습됐다. 표정 7개 확률을 그대로 넣으면 shape mismatch 로 즉시 죽고, 억지로 평균 등으로 낮추면 잘못된 점수. 그래서 <b>화면 옆에 별도</b> 로만 둔다(ADR-0029/0032). <span class="tag t-new">09-17</span> 게다가 <b>AI 채용 정책상 감정 인식 신호를 판정 입력으로 쓰지 않는다</b> — 표정·음성 신호를 판정/Claude 입력에 넣지 않는 것이 원칙이라, "재학습 뒤 판정 벡터로 이관"은 이 제약 아래에서만 검토한다. 표정은 어디까지나 담당자 참고용 UI.</dd>
+<dt>실측</dt><dd>ViT 로드 확인: <code>docker exec arda-lie-detection-1 python -c 'model = AutoModelForImageClassification.from_pretrained(VIT_MODEL); print(model.config.id2label)'</code> → 7종 라벨 정상 반환. 파이프라인 자체는 <b>얼굴 검출 되어야</b> 표정 나옴 — no_face 면 UI 에 표정 없이 판정만.</dd>
+<dt>주의</dt><dd>표정 UI 는 <b>채용자 화면 (InterviewRoom.tsx)</b> 에만. APK (지원자 자리) 에는 표시 안 함 — ADR-0029 "지원자에게 실시간 판정을 보여주면 답변을 바꾼다".</dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 4. STT 180 ═══════════════════ -->
+<section id="s4">
+<h2>4. STT 상한 45s → 180s · 3분 답변 커버<small>faster-whisper CPU 실측 1.8배속 기준 재계산</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">개정</span>STT_TIMEOUT_SEC · 계산 근거 재수립</h3>
+<p class="one">기존 45초 상한이 "int8 4배속 가정" 이었지만 실측은 1.8배속. Daniel Kim 98초·63.8초 답변이 자리표시자로 저장되던 것을 실측 뒤 180초로 상향.</p>
+<dl>
+<dt>왜 바꿨나</dt><dd>실측 DB (2026-09-10 저녁):
+<pre><code>| seq | question | 저장된 답변                |
+|-----|----------|-----------------------------|
+|   1 | 3k 동시…  | [전사 지연 · 발화 98.0초]  |  ← 상한 초과
+|   2 | disconnect… | [전사 지연 · 발화 63.8초] |  ← 상한 초과</code></pre>
+CPU int8 실측 <b>1.8배속</b> (ADR-0032 §근거) 이므로 3분 발화 = <b>100초 처리</b>. 상한 45초는 첫 3분 답변에도 못 미친다. 면접은 3분 이상 이야기하는 자리(팀장 지적).</dd>
+<dt>어디에</dt><dd><code>ai/lie-detection/interview_ws.py:836</code> · <code>STT_TIMEOUT_SEC = float(os.getenv("STT_TIMEOUT_SEC", "180"))</code>. env override 그대로.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">interview_ws.py — 계산 근거 주석과 함께</span><code># **면접 답변은 3분까지 갈 수 있다** (2026-09-10 실측). CPU int8 실측 속도(1.8배속)
+# 로 3분 발화가 100초 안에 처리되고, 여기에 여유 80초를 더한 180초로 상향한다.
+# 이 시간에 다음 질문은 이미 나가 있으므로 지원자를 대기시키지 않는다.
+#
+# GPU 로 옮기면 30~50배속이라 3분 답변도 ~5초에 끝난다. 그때는 상한을 다시
+# 45초로 되돌려도 된다 — 짧게 두면 STT 스레드가 CPU 자원을 오래 잡지 않는다.
+STT_TIMEOUT_SEC = float(os.getenv("STT_TIMEOUT_SEC", "180"))</code></pre></dd>
+<dt>무해한 이유</dt><dd>전사는 별도 스레드. 면접 흐름은 <b>다음 질문 이미 받아 뒀으므로</b> 지원자를 대기시키지 않는다 (<code>submit_answer</code> 흐름 · <code>fetch_questions</code> 로 다음 질문 미리 받음). STT 스레드가 CPU 를 오래 잡는 동안에도 이벤트 루프는 계속 돌아 다음 답변을 받는다.</dd>
+<dt>남는 한계</dt><dd><b>5분 이상 답변은 CPU 로 여전히 불가.</b> 300초 발화 → 165초 처리, 상한을 어떻게 늘려도 CPU 가 답변 페이스 못 따라감. 동시 지원자 여러 명도 CPU 병목. <b>GPU 만이 진짜 해결</b> (T4 30배속, 3분 답변 → 6초, 10분 답변 → 20초).</dd>
+</dl>
+</div>
+
+<div class="note new"><b>2026-09-18 갱신 · STT 는 OpenAI whisper-1 API 로 서빙한다</b><br>
+<b>OpenAI whisper-1 실시간 전사</b>가 프로덕션 기본이다 (ADR-0038 · 분당 $0.006 → 면접당 ~$0.06). <b>무음 구간 hallucination</b>(빈 소리에 없는 말을 지어냄)은 <code>no_speech_prob</code> 게이트로 완화했다. 로컬 <code>faster-whisper large-v3-turbo</code> 경로는 폴백으로 코드에 남아 있고, 아래 §4 의 CPU int8 180초 상한 논리는 그 로컬 경로 실측 당시의 기록이다.<br>
+GPU 실측(Tesla T4): faster-whisper large-v3-turbo CUDA fp16 <b>275ms/3s</b> — 로컬 경로를 GPU 에서 돌렸을 때의 참고 수치다.</div>
+</section>
+
+<!-- ═══════════════════ 5. 세션 삭제 ═══════════════════ -->
+<section id="s5">
+<h2>5. 세션 삭제 API + UI<small>담당자가 옛것 정리할 자리 · 자식 표 수동 CASCADE</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">신규</span>DELETE /interview-sessions/{id}</h3>
+<p class="one">상태 무관 삭제. pending · in_progress · done · expired 모두 지울 수 있다. FK 에 <code>ondelete</code> 를 안 걸어 뒀기 때문에 수동 CASCADE 로 자식 표(<code>interview_findings</code>, <code>interview_turns</code>) 를 먼저 지운다.</p>
+<dl>
+<dt>어디에</dt><dd><code>backend/app/api/interviews.py</code> · <code>delete_session(session_id, db, user)</code>. <code>get_current_user</code> 필수 — 담당자만.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">interviews.py — 순서가 중요</span><code>@router.delete("/interview-sessions/{session_id}",
+               status_code=HTTPStatus.NO_CONTENT)
+def delete_session(session_id, db, user):
+    from app.models import InterviewFinding
+    session = db.get(InterviewSession, session_id)
+    if session is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, "면접 세션을 찾을 수 없습니다")
+
+    # 자식 먼저 — FK ondelete 가 없어 순서를 지켜야 한다
+    db.execute(InterviewFinding.__table__.delete()
+               .where(InterviewFinding.session_id == session_id))
+    db.execute(InterviewTurn.__table__.delete()
+               .where(InterviewTurn.session_id == session_id))
+    db.delete(session)
+    db.commit()</code></pre></dd>
+<dt>프론트</dt><dd><code>frontend/app/src/api/endpoints.ts</code> · <code>interviews.remove(sessionId)</code>. <code>ApplicantPanel.tsx</code> 세션 행 헤더에 "삭제" 버튼 (danger 색). <code>window.confirm</code> 으로 실수 방지 — "세션·질문·답변·findings 가 함께 지워지고 되돌릴 수 없습니다".</dd>
+<dt>정책</dt><dd><ul>
+<li><b>상태 제한 없음</b> — 어제 in_progress 로 남았던 세션 23 스타일도 여기서 정리 가능.</li>
+<li><b>지원자 접속 중이어도 허용</b> — 방이 닫힐 뿐 되돌릴 수 없는 손해 없음.</li>
+<li>확인창 필수 — 자식 다 함께 지워짐 명시.</li></ul></dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 6. 불합격 사유 ═══════════════════ -->
+<section id="s6">
+<h2>6. 자동 불합격 사유 UI<small>doc_score_detail.concerns 를 요약 아래에 노출</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">신규</span>RejectionReason 컴포넌트</h3>
+<p class="one">자동 심사(ADR-0034)로 불합격 판정된 지원자에게 판정 근거를 요약 옆에 붙인다. 데이터는 원래 있었지만 화면에 안 나왔던 자리를 뚫었다.</p>
+<dl>
+<dt>왜 필요</dt><dd>담당자가 지원자 패널을 열면 아르 요약(<code>gist</code> · <code>fit</code> · <code>concerns</code>)만 보이고, 불합격한 경우 <b>왜 떨어졌나</b> 는 다른 자리에서 찾아야 했다. 실제 판정 이유는 <code>doc_score_detail</code> 에 이미 쌓여 있었다.</dd>
+<dt>언제 뜨나</dt><dd><ul>
+<li><code>current_stage === 'rejected'</code> (실제 불합격)</li>
+<li><code>doc_decision === 'reject'</code> (자동 심사 불합격 판정)</li>
+<li><code>decision_source === 'agent'</code> (사람이 아니라 아르)</li>
+<li><code>doc_score_detail</code> 있음</li></ul></dd>
+<dt>무엇을 보여주나</dt><dd><ul>
+<li>🔴 아르 자동 불합격 배지 + <b>총점 / 기준점</b> (예: 50점 · 기준 60점)</li>
+<li>필수 · 우대 · 인재상 세 축 점수 (담당자가 어느 축이 부족했나 즉시 판독)</li>
+<li>불합격 사유 (<code>concerns</code>) 목록</li></ul></dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">frontend/app/src/api/types.ts — 백엔드 스키마는 이미 갖고 있었으나 프론트 타입에서 빠져 있었다</span><code>export interface DocScoreDetail {
+  requirements?: number
+  preferred?: number
+  culture?: number
+  fit?: string[]
+  concerns?: string[]
+  evidence?: string[]
+  weights?: Record&lt;string, number&gt;
+  threshold?: number
+}
+
+export interface ApplicationDetail {
+  ...
+  doc_score?: number | null
+  doc_score_detail?: DocScoreDetail | null
+  doc_decision?: 'pass' | 'reject' | 'hold' | null
+  decision_source?: 'agent' | 'human' | null
+}</code></pre>
+<pre><span class="f">ApplicantPanel.tsx — 조건부 렌더</span><code>{detail.current_stage === 'rejected'
+  &amp;&amp; detail.doc_decision === 'reject'
+  &amp;&amp; detail.decision_source === 'agent'
+  &amp;&amp; detail.doc_score_detail
+  &amp;&amp; (
+    &lt;RejectionReason
+      score={detail.doc_score ?? null}
+      threshold={detail.doc_score_detail.threshold ?? null}
+      detail={detail.doc_score_detail}
+    /&gt;
+  )}</code></pre></dd>
+<dt>스타일</dt><dd><code>--danger-soft</code> 배경 · <code>--danger</code> 좌측 테두리로 "결정이 이미 난 자리" 를 색으로 알려 준다. 다른 자리(cover_letter 등)와 달리 여기는 <b>결정 사후 자리</b>라 색이 정보.</dd>
+<dt>예시</dt><dd>한지우 (자동 불합격 50점):
+<pre><code>아르의 요약
+[요약 · 강점 · 확인 필요]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+🔴 아르 자동 불합격        50점 · 기준 60점
+필수 35 · 우대 50 · 인재상 75
+
+불합격 사유
+• Python·FastAPI 실무 경험 없음, React·TypeScript 전문가
+• PostgreSQL 등 백엔드 스택 경험 여부 확인 필요
+• 우대사항 없어 추가 가산점 기준 부재
+━━━━━━━━━━━━━━━━━━━━━━━━━</code></pre></dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 7. 배포 CPU-only ═══════════════════ -->
+<section id="s7">
+<h2>7. 배포 파이프라인 복구 · torch CPU-only + EBS 50GB<small>디스크 부족으로 며칠 죽어 있던 CD 를 되살리는 과정</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">개정</span>requirements-vit.txt — CPU-only 인덱스</h3>
+<p class="one">torch 가 기본 인덱스에서 <code>nvidia-cudnn</code> · <code>nvidia-cublas</code> · <code>triton</code> · <code>cuda-toolkit</code> 등 GPU 런타임 5GB 를 통째로 끌고 와 서버 (29GB 중 8GB 남음) 를 터뜨리던 것을 CPU 전용 인덱스로 잡음.</p>
+<dl>
+<dt>왜 필요</dt><dd>배포 로그 (실측):
+<pre><code>#31 108.9 ERROR: Could not install packages due to an OSError:
+       [Errno 28] No space left on device
+       (설치 중: nvidia-cusparselt-cu13, cuda-toolkit, triton, sympy, ...,
+                torch, torchvision)</code></pre>
+결과 <b>#163·#165·#166·#167·#168 이 서버에 며칠째 반영 안 됨</b> — 프론트만 Vercel 로 자동 배포되어 UI 는 보이는데 백엔드가 옛 코드.</dd>
+<dt>코드로</dt><dd>
+<pre><span class="f">ai/lie-detection/requirements-vit.txt — CPU-only 인덱스</span><code># CPU 서버(t3.large) 에서 도는 자리라 **CPU-only torch** 로 설치한다.
+# 기본 (`pip install torch`) 은 CUDA 패키지(nvidia-cudnn·nvidia-cublas 등)를 통째로
+# 끌고 와 이미지 · 디스크가 ~5GB 넘게 부풀고, 우리 서버 (29G 중 8G 남음) 에서
+# `No space left on device` 로 배포가 계속 실패했다 (2026-09-10 실측).
+#
+# 아래 `--index-url` 는 CPU 전용 whl 저장소. torch 자체는 ~200MB.
+# **버전을 pin 하지 않는다** — CPU 인덱스에 있는 최신을 자동으로 잡는다. 옛 특정
+# `+cpu` 태그 (예: torchvision==0.20.1+cpu) 는 게시가 취소된 것들이 있어서 pin 하면
+# 오히려 다시 터진다. 지금은 `&gt;=` 만 걸고 pip 에게 결정을 맡긴다.
+#
+# GPU 서버로 옮길 때는 이 `--extra-index-url` 줄만 지우고 다시 빌드한다.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+torch&gt;=2.5
+torchvision&gt;=0.20
+transformers&gt;=4.40
+pillow&gt;=10.0</code></pre></dd>
+<dt>겪은 일 (3개 단계)</dt><dd><ul>
+<li><b>단계 1 · PR #169</b> — <code>--extra-index-url</code> 만 추가 후 <code>torch==2.5.1+cpu</code> 로 pin. 실패: <code>torchvision==0.20.1+cpu</code> 가 CPU 인덱스에서 <code>yanked</code> 로 게시 취소.</li>
+<li><b>단계 2 · PR #170</b> — <code>+cpu</code> pin 해제. 성공. 인덱스에 있는 최신 <code>+cpu</code> 변종 자동 선택.</li>
+<li><b>단계 3 · 사용자 손</b> — AWS 콘솔에서 EBS <b>29 → 50GB</b> 확장. <code>growpart /dev/nvme0n1 1 &amp;&amp; resize2fs /dev/nvme0n1p1</code>. 확장 후 여유 27GB (44% 사용). 월 $3 추가.</li></ul></dd>
+<dt>교훈</dt><dd>PyTorch CPU 서버에서는 <b>반드시 CPU whl 인덱스로 명시</b>. 기본 인덱스는 GPU 우선이라 nvidia-* 계열이 끌려 온다. GPU 승격 시엔 이 두 줄만 지우고 CUDA 베이스 이미지로 Dockerfile 재작성.</dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 8. ADR-0028 §1.7 ═══════════════════ -->
+<section id="s8">
+<h2>8. ADR-0028 §1.7단계 · 우회의 흔적을 남긴다<small>PR #173 · 소유자가 뚫어도 자국이 남게</small></h2>
+
+<div class="tech l-api">
+<h3><span class="tag t-api">문서</span>ADR-0028 §1.7단계 세 갈래</h3>
+<p class="one">1.6단계 (권한 분리) + 관리 비밀번호 분리로도 테이블 소유자는 여전히 <code>ALTER TABLE ... DISABLE TRIGGER</code> 로 append-only 잠금을 뚫을 수 있다. <b>막을 수는 없지만 — 우리 서버니까 — 뚫으면 반드시 자국이 남게</b> 할 수 있다.</p>
+<dl>
+<dt>왜 필요</dt><dd>1.6단계까지의 한계: 관리 비밀번호를 아는 사람은 여전히 원장을 다시 쓸 수 있다. ADR-0028 서두의 원칙 ("우리는 못 막을 수 있지만, 고친 사실이 밖에서 드러난다") 을 <b>DB 층에서도</b> 반복 적용.</dd>
+<dt>세 갈래 (구현 미완 · 팀 결정)</dt><dd><ul>
+<li><b>① Event trigger 로 트리거 상태 변경을 append-only 감사 로그에 기록</b> — PostgreSQL 의 DDL 이벤트 트리거(<code>ddl_command_start</code> · <code>ddl_command_end</code>) 를 잡아 <code>ALTER TRIGGER</code> 이벤트를 <code>document_anchors_trigger_audit</code> 에 append. 이 감사 표에도 append-only 트리거를 걸면 우회는 <b>감사 로그 자체까지 지워야</b> 가능해진다.</li>
+<li><b>② <code>document_anchors.tgenabled</code> 를 주기 감시 · 변경 시 알림</b> — <code>pg_trigger.tgenabled</code> 를 1분마다 확인하는 헬스체크. <code>'D'</code> (disabled) 로 바뀐 순간 슬랙 · 이메일 · 팀 채널에 알림. 이미 있는 n8n 워크플로 구조로 가볍게.</li>
+<li><b>③ Sepolia 게시 시점에 원장 검증 · 어긋나면 게시 중단</b> — <code>chain_publications</code> 배치가 돌 때 <code>seq</code> 구멍 · <code>chain_hash</code> 사슬 무결성 확인. 어긋난 것이 있으면 게시 중단 + 알림. <b>뚫린 상태를 밖으로 못 나가게</b> 한다.</li></ul></dd>
+<dt>우선순위</dt><dd>③ &gt; ② &gt; ①. <b>③이 외부 증명 신뢰도를 지키는 값이 크다</b>. ② 는 가장 값싸다 (n8n 헬스 하나). ① 은 DDL 이벤트 트리거 도입이라 검토 필요.</dd>
+<dt>목적</dt><dd>봉인이 아니라 문턱·자국. 셋 다 붙으면 <b>누구도 조용히 못 뚫는다</b> — 뚫으면 반드시 감사 로그 · 알림 · 게시 중단 셋 중 하나에 자국.</dd>
+</dl>
+</div>
+</section>
+
+<!-- ═══════════════════ 9. 원장 뚫기 ═══════════════════ -->
+<section id="s9">
+<h2>9. 잠긴 원장 뚫기 · 실전 절차 · 뒤처리<small>fit-check 24명 재접수 · 트랜잭션 하나로 처리</small></h2>
+
+<div class="tech l-hot">
+<h3><span class="tag t-hot">실전</span>트리거 임시 해제 → 삭제 → 재활성화 — 트랜잭션 원자성으로 안전</h3>
+<p class="one">시연 앞두고 fit-check 24명 중 23명을 새 STAR 콘텐츠로 재접수. append-only 트리거가 막고 있어 임시 해제가 필요했다. 실행 스크립트는 사후 삭제.</p>
+<dl>
+<dt>왜 이 절차</dt><dd>fit-check 지원자들의 옛 자소서를 새 STAR 4문항 형식으로 재접수하려는데, <code>document_anchors</code> 의 append-only 트리거가 <code>DELETE</code> 를 거부. 지원자 삭제도 <code>document_anchors.application_id</code> FK 때문에 실패. <b>트리거 해제 없이는 불가능</b>.</dd>
+<dt>실행 SQL</dt><dd>
+<pre><span class="f">wipe_fit_check.sql — 트랜잭션 원자성으로 안전</span><code>BEGIN;
+-- 대상 지원자 id (홍지민 be-05 제외 · 시연 배지 대상으로 유지)
+CREATE TEMP TABLE _targets AS
+SELECT id FROM applications
+WHERE email LIKE 'fitcheck-%@example.com' AND email &lt;&gt; 'fitcheck-be-05@example.com';
+
+-- 자식 표 먼저 (interview_findings · turns · sessions 등 11개)
+DELETE FROM interview_findings WHERE session_id IN (
+  SELECT id FROM interview_sessions WHERE application_id IN (SELECT id FROM _targets));
+-- ... 나머지 9개 자식 표 삭제 ...
+
+-- document_anchors 를 files 보다 먼저 지운다 (document_anchors.file_id FK → files.id)
+ALTER TABLE document_anchors DISABLE TRIGGER trg_document_anchors_append_only;
+DELETE FROM document_anchors WHERE application_id IN (SELECT id FROM _targets);
+ALTER TABLE document_anchors ENABLE TRIGGER trg_document_anchors_append_only;
+
+DELETE FROM files WHERE application_id IN (SELECT id FROM _targets);
+DELETE FROM applications WHERE id IN (SELECT id FROM _targets);
+
+-- 검증 (반드시 확인)
+SELECT tgname, tgenabled FROM pg_trigger
+WHERE tgname LIKE 'trg_document_anchors%';  -- 두 개 다 'O' 여야 함
+
+COMMIT;</code></pre></dd>
+<dt>안전 장치</dt><dd><ul>
+<li><b>트랜잭션 원자성</b> — BEGIN...COMMIT 사이 어디서든 실패 시 자동 ROLLBACK → 트리거 상태·데이터 다 되돌림.</li>
+<li><b>DDL 문도 트랜잭션 안</b> — PostgreSQL 의 <code>ALTER TABLE</code> 은 트랜잭션 내에서 롤백 가능.</li>
+<li><b>커밋 뒤 검증 필수</b> — <code>SELECT tgname, tgenabled FROM pg_trigger WHERE tgname='trg_document_anchors_append_only'</code> 로 <code>'O'</code> (ENABLED) 확인.</li>
+<li><b>스크립트 사후 삭제</b> — <code>rm wipe_fit_check.sql</code> · 서버·컨테이너·로컬 모두. 뚫은 방법이 남아 있으면 다시 뚫릴 수 있다.</li></ul></dd>
+<dt>재접수</dt><dd>새 <code>submit_new.py</code> 로 STAR 자소서 텍스트 + 새 PDF 를 <code>POST /public/postings/{id}/applications</code> 로. 23명 접수 성공, 홍지민 1명은 <code>--skip fitcheck-be-05@example.com</code> 로 남김.</dd>
+<dt>최종 상태</dt><dd><ul>
+<li>총 fit-check 지원자: 24명 (23 새것 + 홍지민 1)</li>
+<li>홍지민 (id=52): 옛 application · 옛 anchor · <b>새 S3 PDF</b> → "내용이 바뀜" 배지 시연 대상</li>
+<li>새 23명 (id 60~82): 새 application · 새 anchor · 새 S3 → 배지 없음 (정상)</li>
+<li>트리거: 두 개 다 <code>ENABLED</code> · DELETE 시도 시 <code>ERROR: 무결성 원장은 삭제할 수 없습니다</code></li>
+<li>Sepolia 게시된 앵커 (seq 30 · seq 78) 영향 없음 (우리가 삭제한 것은 seq &gt; 78)</li></ul></dd>
+<dt>연결</dt><dd>이 사건이 <b>§8 (ADR-0028 §1.7단계)</b> 을 문서에 추가하게 된 계기. "봉인이 아니라 문턱이지만, 뚫으면 자국이 남게" 라는 방향의 근거.</dd>
+</dl>
+</div>
+
+<div class="note warn"><b>주의 · 실 운영에선 절대 하지 않을 것</b>. 이 절차는 시연 데이터(fit-check applicants) 에 한정. 실 지원자 데이터는 무결성 원장을 그대로 보존해야 한다. 오늘 이 절차를 실행할 수 있었던 것은 <b>이 데이터가 시연용</b>이라는 특수 상황.</div>
+</section>
+
+<p class="lede" style="margin-top:40px">근거: 오전 09-10 해부 노트 (변경 없는 기술) · <code>backend/app/api/interviews.py</code> · <code>backend/app/agent/interview_probe.py</code> · <code>ai/lie-detection/feature_extractor.py</code> · <code>ai/lie-detection/interview_ws.py</code> · <code>ai/lie-detection/app.py</code> · <code>ai/lie-detection/requirements-vit.txt</code> · <code>ai/lie-detection/Dockerfile</code> · <code>infra/docker-compose.prod.yml</code> · <code>frontend/app/src/pages/InterviewRoom.tsx</code> · <code>frontend/app/src/pages/InterviewWatch.tsx</code> · <code>frontend/app/src/pages/ApplicantPanel.tsx</code> · <code>frontend/app/src/pages/useLiveAnalysis.ts</code> · <code>frontend/app/src/api/types.ts</code> · <code>frontend/app/src/api/endpoints.ts</code> · <code>backend/alembic/versions/0017_followup_questions.py</code> · <code>docs/03_decision/0028-제출물-무결성-앵커.md</code> · <code>docs/03_decision/0032-추론-모델-3종-확정.md</code>. 작성 2026-09-10 저녁 · <b>2026-09-17 갱신</b> → <b>2026-09-18 클라우드 전환</b>(헥사고날 완결·판단 엔진 클라우드 Anthropic Claude 서빙·STT OpenAI whisper-1 API·ADR-0036~0038·규모 수치 반영).</p>
+</div>
+</body>
+</html>
