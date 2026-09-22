@@ -4,16 +4,103 @@ name: 진수택
 domain: 인프라·총괄
 color: "#7aa2f7"
 cards:
-  - title: "Qwen3-8B QLoRA 학습 파이프라인 · 시연 배포 스크립트 — AWS G4dn 학습 겸용"
-    feature: "PR#183"
-    status: doing
-    note: "AWS g4dn.xlarge(T4 16GB) 에서 학습 진행 중 · 예상 21:20 완료"
+  - title: "Qwen vs Claude 정량·품질 비교 보고서 · 정리 서류 13종 클라우드 기준 최종 갱신"
+    feature: "최종 정리"
+    status: done
+    done: 2026-09-22
+    note: "해커톤 제출 코드는 프리즈 — 문서·시각화만 · 팀 지킬 최종 반영"
     detail: |
-      로컬 노트북 GPU 부족으로 AWS 클라우드 GPU 로 학습을 옮긴 파이프라인 일괄.
-      학습 데이터 222건(실측 21 + 합성 192 + 인터뷰 chain 시드 9) 로 아르 도구 호출·요약·서류 대조·꼬리질문·점수까지 5개 chain 을 한 모델에 학습.
-      QLoRA(가중치 4-bit 압축 + 작은 어댑터만 학습) 방식으로 T4 16GB VRAM 에 8B 모델을 얹었다.
-      같은 인스턴스에 학습→GGUF 변환→Ollama 배포까지 원스톱 · 예상 총 비용 ~$10(예산 $400 의 3%).
-      결과물은 50MB 어댑터 하나 · 시연 서버(g4dn) 에서 `AGENT_CHAT_BACKEND=ollama` 한 줄로 Anthropic Claude 대체.
+      같은 자(judge.py · 동일 23건)로 학습 전 Qwen 26.1% → Claude Haiku 69.6% → Qwen v9 73.9% 를 차트로 정리하고, pass/fail 너머의 품질 4축을 분해했다 — 판정 항목별(학습 전 Qwen 약점은 도구 이름 일치 26% 한 축뿐 · 위반 없음 100%) · 질문 유형별(Claude write 0/5 는 단일턴 채점 한계) · 실패의 질(셋 다 위험한 실패 0건) · 요약 어댑터 정성 품질(경력 연수 오차·예시 베끼기).
+      비용($0.0139/eval건 · $0.0075/실사용 · Qwen $0+GPU $0.71/h)·지연(콜드 78초)·STT 무음 hallucination 까지 한 문서로 · 해석 주의(채점기 편향·23건 표본 → "동급"이 정직한 표현) 명시. HTML + PDF.
+      바탕화면 정리 서류 13종 본문을 클라우드 기준으로 재작성(온프레미스 확정·미의존 결론 0건), 크레덴셜·전화번호 제거. 프로젝트 소개 슬라이드(html·png·jpg) · 09-18 멘토링 피드백 지킬 기록.
+
+  - title: "클라우드 전환 확정 · 온프레미스 폐쇄 — 심사 서빙 = AWS + Anthropic Claude"
+    feature: "결정 · 종합보고"
+    status: done
+    done: 2026-09-18
+    note: "3대 PC 온프레미스를 구축했다가 심사 직전 폐쇄 · 이유와 오류 기록을 종합보고로"
+    detail: |
+      09-16~18 학원 PC 3대(Cloudflare Tunnel · Ollama 어댑터 3갈래 · MinIO) 로 온프레미스를 실제 구축·운영했다.
+      그러나 로컬 sLLM 의 다단계 도구호출 불안정(create_application 이 list_postings 를 건너뛰고 id 추측) · 브라우저↔내부 MinIO 불가 · 소형모델 특유 오류(프롬프트 예시 숫자 베끼기 → 전원 64~65점 수렴, JSON 따옴표 깨짐, 면접 중 컨테이너 재기동으로 답변 소실) 가 심사 직전에 누적됐다.
+      심사는 검증된 AWS 스택(Claude 안정 도구호출 · 실 S3)으로 확정. 온프레 코드·어댑터·GPU 이미지는 자산으로 보존, 구축·오류·폐쇄 경위를 종합보고 문서로 남겼다.
+
+  - title: "심사위원 데모 로그인 — 담당자·지원자 버튼 · 시연계정 잠금 · 로그인마다 리셋"
+    feature: "PR#333 #335 #337~#339 #342~#346"
+    status: done
+    done: 2026-09-18
+    note: "심사위원 여럿이 같은 계정을 써도 매번 처음 상태로"
+    detail: |
+      로그인 화면에 담당자·지원자 데모 버튼(?demo= 자동로그인). 데모 계정은 사용자·권한 관리와 메일 템플릿 변경을 행위자 가드로 차단(읽기 전용) — 심사자가 비번을 바꿔 서로 못 들어가는 사고 방지.
+      지원자 데모(조민석)는 로그인마다 인적성·면접시간·AI면접 세 화면을 초기화하고 만료를 미래로 갱신(자기 치유) · 첫 진입 안내 팝업 · 이력서·자소서 기반 AI 면접 맞춤 질문 자동 노출.
+      종합평가 화면에 계정 메뉴 추가 · 이름 클릭은 상세 패널, 종합평가는 「자세히 보기」로만(#330). 라이브 검증 완료.
+
+  - title: "아르 캔드 응답 $0 — 인사·능력·사용법 + 지원자 FAQ 기본·경계 질문 · 회사 프로필 근거"
+    feature: "PR#334 #347 #348"
+    status: done
+    done: 2026-09-18
+    note: "정적 발화가 매번 LLM 을 타 ~$0.02 씩 나가던 것을 규칙으로 우회"
+    detail: |
+      의도 라우터에 DirectAction.reply_text 를 추가해 인사·능력·사용법은 도구·LLM 없이 고정 문구로 답한다(^…$ 로 묶어 실제 요청이 붙으면 LLM 으로).
+      지원자 FAQ 도 인사·연봉·합격 가능성·감사 등은 캔드 · 나머지는 회사 프로필(코드브릿지)을 근거로 Claude 가 답한다.
+      실측 · 아르 3건 대화 8.4K tok $0.04 → 기본 질문은 $0. Gemini 추가 제안은 채택하지 않음(엔진 둘로 나누면 품질·비용 관측이 갈린다).
+
+  - title: "자료 부족 지원자 자동 서류 탈락 — ADR-0034 확장 · 「서류 탈락」 라벨"
+    feature: "PR#349 #351"
+    status: done
+    done: 2026-09-18
+    note: "자소서 1줄·전부 미기재면 분석할 게 없다 — 자동 탈락"
+    detail: |
+      요약 결과 insufficient=true(자료 부족) 이면 decide_document 가 applied→screening→rejected 로 옮겨 프론트에 「서류 탈락」 라벨이 붙게(applied→rejected 직행이면 「불합격」으로 보이던 것 수정).
+      실제 역량이 있는 지원자(insufficient=false)는 건드리지 않는다 — 대량 탈락 방지. 대상 3명은 요약 재생성 없이 decide_document 만 재실행($0).
+
+  - title: "아르 챗 개선 — 이력서·자소서 다중 첨부 · 공고 인라인 선택 · 무관 질문은 「데이터 근거」로 거절"
+    feature: "PR#336 #341 #353"
+    status: done
+    done: 2026-09-18
+    detail: |
+      파일 여러 개 드롭 · 선택형 답변을 카드 대신 메시지 안 인라인 링크로.
+      채용 밖 질문(유명인 등)에 Claude 가 답을 다 생성한 뒤 거절을 붙여 토큰 낭비·무관 답 유출하던 것을, 판단 기준 = "답의 근거가 우리 데이터냐" 로 프롬프트 재작성 — 외부 일반 지식은 내용 답변 없이 한 문장 거절, 이력서·자소서 속 인물·프로젝트는 원문 조회해 정상 답변.
+
+  - title: "아르 챗 이력서 드롭 접수 · 이력서 변동 diff · 탈락 축 표시 · 종합 점수 타일"
+    feature: "PR#318 #320 #326 #327 #328 #321 #322 #299"
+    status: done
+    done: 2026-09-17
+    detail: |
+      채팅에 이력서를 드롭하면 공고 선택·인적사항 확인 뒤 create_application 확인 게이트로 접수(접수 후 AI 서류 심사 자동).
+      같은 사람 재접수 시 이전 지원 대비 변동 요약 chain + 배지. 서류/면접/종합 어디서 떨어졌는지 빨간 축으로 한눈에. 종합 점수·등급 타일, 담당자 별점 UI 를 종합평가 링크로 대체.
+
+  - title: "요약 v2 career_years 추출 · lie-detection GPU(cuda) 이관 · CI 에 AI·앱 시험 · 이력서 본문 DB 저장 경로"
+    feature: "PR#294 #324 #310 #282"
+    status: done
+    done: 2026-09-17
+    detail: |
+      폼에 경력이 없으면 이력서에서 연차를 추출해 채운다(AI 추정 표식 유지는 #311 후속 · 미머지). VIT_DEVICE=cuda 로 arda-gpu 이관 — T4 실측 STT 275ms/3s · ViT 75ms/crop.
+      CI 에 AI 면접 서버·Flutter 앱 시험 잡 추가 + 배포 워커 1개 재확인. 온프레미스 대비 이력서 본문 DB 저장 경로(S3 는 그대로).
+
+  - title: "웹 지원자 AI 면접 → 담당자 화상 면접방 WebRTC 송신"
+    feature: "PR#278"
+    status: done
+    done: 2026-09-16
+    detail: |
+      지원자 웹 AI 면접의 영상·음성을 담당자 실시간 분석 화면으로 1:1 P2P 송신. 3인 이상(SFU)은 시연 뒤 집단 면접으로 다시 본다.
+
+  - title: "종합평가에서 최종 합불 결정 · 공고 마감/다시 열기 · 요약 체인 v2 스키마 정합"
+    feature: "09-15"
+    status: done
+    done: 2026-09-15
+    detail: |
+      종합평가 화면에서 바로 최종 합격·불합격 결정(사람이 최종). 공고 마감·다시 열기 버튼 — 최종 결과 뒤 담당자가 직접 닫는다. 요약 체인 2단계 스키마를 chain_evaluate.v2 모양으로 맞춰 Ollama format 강제 시 20점 단위 폴백 문제 해소.
+
+  - title: "Qwen3 QLoRA 자체학습 완결 — chat v9 73.9% · 요약·면접 어댑터 3갈래 (Colab)"
+    feature: "PR#183 → v6~v9"
+    status: done
+    done: 2026-09-17
+    note: "같은 자(judge.py)로 학습 전 26.1% → v9 73.9% · 심사 서빙은 클라우드+Claude 확정, Qwen 은 비용 절감 R&D 자산"
+    detail: |
+      학습 데이터 222건(실측 21 + 합성 192 + 인터뷰 chain 시드 9) 로 아르 도구 호출·요약·서류 대조·꼬리질문·점수 chain 을 QLoRA(4-bit + 어댑터) 로 학습. 초기 AWS G4dn(T4) 에서 시작해 v7~v9 는 Google Colab GPU(L4/T4) 에서 훈련.
+      핵심 모순을 풀었다 — eval_loss 는 잘 떨어졌는데(0.339→0.074) 도구 호출은 전멸 → 손실이 7,347자 공통 시스템 프롬프트에 쏠리고 tool_call 은 1.8%라 기울기가 안 닿은 것. 이를 교정해 v9 에서 도구 이름 일치 축을 고쳤다.
+      v9 fail 6건 중 5건은 UX상 정상(실질 ~95%+) · 어댑터 3갈래(chat v9 · summary · interview) 분리 서빙 · 요약 어댑터는 JSON·요지·역량은 정확하나 경력 연수 오차(3→5년).
+      결론 · 정확도는 Claude 와 동급까지 왔으나 수치 추론·형식 안정성과 콜드 스타트 78초·동시성에서 갈려 심사 서빙은 클라우드+Claude 로. 학습 파이프라인·어댑터는 R&D 자산으로 보존.
 
   - title: "서류 자동 판정 가중치 개정 · 요건 강조·우대 축소·문화 하한 규칙"
     feature: "PR#182"
@@ -216,9 +303,12 @@ cards:
       배포 자동화(systemd 2분 폴링) 문서화, 팀 전체가 코드를 push 하면 자동으로 반영되는 흐름 확정.
 
   - title: "면접 일정 조율 에이전트 — 면접관 가용 시간 파악→후보 제안→선택→확정"
-    feature: "신규"
-    status: doing
-    note: "search_users 도구 추가로 이름→ID 변환 가능, 라이브 테스트 통과"
+    feature: "PR#150 PR#153 PR#157"
+    status: done
+    done: 2026-09-01
+    note: "일정 도구 4개 + search_users 로 이름→ID 변환 + 지원자 대화형 일정 페이지로 완결"
+    detail: |
+      아르가 면접관 가용 시간을 보고 후보를 제안하고, 지원자가 메일 링크의 대화형 페이지에서 고르면 확정되는 흐름 전 구간. 라이브 테스트 통과 · 최종 정리 시점에 done 처리.
   - title: "지원자 일정 페이지를 아르 대화형으로 재작업"
     feature: "PR#157"
     status: done
@@ -319,12 +409,17 @@ cards:
       채팅·요약·STT 3기능의 AI 원가 관측 체계 통일, ADR-0011에 실측 기록.
   - title: "목업 테스트 → 프론트 전달"
     feature: "W2"
-    status: doing
-    due: 2026-09-04
+    status: done
+    done: 2026-09-04
+    detail: |
+      목업 검토 결과를 프론트에 전달 · 09/04 초기 버전 게이트 시점에 종결. 최종 정리 시점에 done 처리.
   - title: "opus-5 실측 · 운영 STT 테스트"
-    feature: "W3"
-    status: todo
-    due: 2026-09-11
+    feature: "W3 → ADR-0038"
+    status: done
+    done: 2026-09-15
+    note: "opus 는 미채택(haiku 기본 유지) · 운영 STT 는 OpenAI whisper-1 API 로 확정"
+    detail: |
+      비용상 채팅·요약 기본 모델은 claude-haiku-4-5 로 유지(ADR-0011 개정은 후속). 운영 STT 는 09-15 실측 — t3.large CPU 에서 로컬 large-v3-turbo 가 44초 발화를 180초 안에 못 끝내 뒤 답변까지 연쇄로 지연 → OpenAI whisper-1 API 로 확정(분당 $0.006 · 면접당 ≈ $0.06). 무음 hallucination 은 no_speech_prob 게이트로 완화.
   - title: "파이프 안정화 — 스킬 exact 최상위 · FAQ 하네스 15 · regenerate 사유 분리"
     feature: "09-03"
     status: done

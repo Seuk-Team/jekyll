@@ -37,9 +37,9 @@ permalink: /guidelines/
 
 **FRONTEND** — React · Vite · TypeScript / **APP** — Flutter
 
-**INFRA** — Docker Compose · AWS (EC2 · S3 · SES · SQS) · Caddy · GitHub Actions · Vercel
+**INFRA** — Docker Compose · AWS (EC2 · S3) · n8n + SMTP 메일 · Caddy · GitHub Actions(CI + 자동 CD) · Vercel
 
-**AI** — Claude API(claude-haiku-4-5) 기본 + Ollama(qwen3:4b) 온프레미스 옵션(환경변수 스위치) · ko-sroberta 임베딩(로컬) · Whisper/faster-whisper STT
+**AI** — Anthropic Claude(claude-haiku-4-5) 서빙 · Qwen3-8B QLoRA 어댑터 3갈래(R&D 자산 · Ollama 스위치) · ko-sroberta 임베딩(로컬) · OpenAI Whisper API STT(faster-whisper 로컬 옵션) · ViT + MediaPipe 표정(담당자 참고용)
 
 ### 코드 관리 규칙
 

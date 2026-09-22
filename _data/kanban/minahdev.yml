@@ -4,6 +4,13 @@ name: 김민아
 domain: 앱·프론트
 color: "#bb9af7"
 cards:
+  - title: "로그아웃을 우측 상단 계정 메뉴로(담당자 웹) · 지원자 「내 정보」 비밀번호 칸 오표시 수정"
+    feature: "09-18 front"
+    status: done
+    done: 2026-09-18
+    detail: |
+      담당자 웹만 로그아웃 진입점이 예외적으로 달랐던 것을 우측 상단 계정 메뉴로 통일. 지원자 내 정보의 비밀번호 칸이 실제와 다른 값을 보여주던 것 수정.
+
   - title: "제출물 무결성 배지 — 상세 패널 첨부 아래"
     feature: "PR#46 이슈#6"
     status: done
@@ -80,10 +87,14 @@ cards:
       지원 정보·단계 변경 버튼이 있는 상세 화면과 로그인 화면 — 목데이터 기반(#138 외).
   - title: "Flutter 앱 M1 (조회·단계 변경·평가)"
     feature: "M1"
-    status: doing
+    status: done
+    done: 2026-09-03
+    note: "큐 8 완료(09-03) 로 조회·단계 변경·평가 전 영역 서버 실연동 · 최종 정리 시점에 done 처리"
   - title: "JWT 로그인 연동 (secure storage)"
     feature: "큐 7"
-    status: todo
+    status: done
+    done: 2026-09-02
+    note: "큐 7 JWT 로그인(09-02) 카드와 동일 항목 · 최종 정리 시점에 done 처리"
   - title: "팀 Android 기기 전원 APK 설치 확인"
     feature: "M1"
     status: todo
