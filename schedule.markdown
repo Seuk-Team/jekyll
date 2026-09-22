@@ -13,7 +13,7 @@ permalink: /schedule/
 
 | 도메인 | 이름 | 담당 영역 | 주요 기술 |
 |--------|------|----------|----------|
-| 인프라·총괄 (팀장) | 진수택 | 클라우드 인프라 구성 및 배포 — 전원의 선행조건 | EC2, S3, SES, SQS, GitHub Actions |
+| 인프라·총괄 (팀장) | 진수택 | 클라우드 인프라·자동 CD·관측 — 전원의 선행조건 · 모델 전략(Qwen 학습 → 클라우드 확정) · 발표 총괄 | EC2, S3, Caddy, Docker Compose, n8n, GitHub Actions, systemd CD, CloudWatch |
 | 백엔드 | 이우정 | 코어 API(인증·공고·지원서·평가·검색)·단계 전환 규칙·인덱스 튜닝 | FastAPI, PostgreSQL, alembic |
 | 에이전트 | 박소연 | 도구 호출 에이전트·AI 요약·RAG·일정 자동화·AI 면접·인적성 | Python, Claude API, pgvector |
 | 앱 · 프론트엔드 | 김민아 | React 웹 + Flutter 앱(Android APK 데모) — 같은 API의 두 클라이언트 | React, TypeScript, Flutter, Dart |
@@ -33,6 +33,8 @@ permalink: /schedule/
 | 인프라 | AWS·ERD·compose | 실배포 1차 | CI/CD | 중간 통합 점검 | 통합 리허설 | |
 
 실측 속도가 계획을 크게 앞서(09/03 기준 1차 완성 정의 대비 약 75%, 일정 경과 36%), W2에 이미 실배포·면접 일정 자동화·에이전트 실물까지 붙었다. 이후 주차는 신규 구현보다 튜닝·연동 마무리·발표 준비에 배정한다.
+
+**09/22 실측** — W4 까지 계획표의 항목은 전부 배포본에 올라갔고, 계획에 없던 것이 그 위에 더 붙었다: AI 면접(WebRTC 1:1 · 실시간 전사 · 참고 지표), 서류 자동 심사(ADR-0034), 인적성 설문, 이력서 해시 사슬 + Sepolia 앵커(ADR-0028), 헥사고날 재구조화(ADR-0035), n8n 메일 전환(ADR-0030·0036), Qwen QLoRA 어댑터 3갈래 R&D. 09/18 온프레미스 이관을 시도했다가 09/20 클라우드 데모로 회귀했다(→ [문제와 극복 D](/challenges/)). W5·09/28~30 은 해커톤 심사 대응과 회사 인계 문서 정리에 쓴다.
 
 ---
 
