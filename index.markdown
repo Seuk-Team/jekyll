@@ -21,6 +21,17 @@ permalink: /
 
 ---
 
+## 소개 영상
+
+<div style="position:relative;width:100%;max-width:800px;aspect-ratio:16/9;margin:0 0 8px">
+<iframe src="https://www.youtube.com/embed/03bVCRI8tdY" title="Arda — AI 채용 에이전트 소개" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:8px" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+</div>
+
+[YouTube 에서 보기](https://youtu.be/03bVCRI8tdY)
+{: .fs-3 }
+
+---
+
 <table class="cv-table">
 <tr><td class="cv-label">사업명</td><td><div class="cv-main">AI 기반 채용 프로세스 자동화 및 지원자 통합 관리 플랫폼</div></td></tr>
 <tr><td class="cv-label">시스템명</td><td><div class="cv-main">Arda (Eval-ATS)</div></td></tr>
