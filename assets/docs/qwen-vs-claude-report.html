@@ -90,6 +90,10 @@
   .ok{color:var(--good-text);font-weight:700} .bad{color:var(--critical);font-weight:700}
   details{margin-top:8px} summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
   footer{margin-top:40px;padding-top:14px;border-top:1px solid var(--grid);color:var(--muted);font-size:12.5px}
+  @media print{
+    h2,h3{break-after:avoid;page-break-after:avoid}
+    .note,.concl,.tiles,.tile,table,tr,.row,.seg,.segl,.legend,.sub,footer{break-inside:avoid;page-break-inside:avoid}
+  }
   @media (max-width:640px){.tiles{grid-template-columns:1fr}.row,.grp .row{grid-template-columns:110px 1fr 56px}}
 </style>
 </head>
@@ -226,7 +230,7 @@
     <tr><td>표정 ViT (GPU fp16 · VRAM 178MB)</td><td>crop 1장</td><td class="num">75ms</td></tr>
     <tr><td>Claude API</td><td>응답 지연</td><td class="num" style="color:var(--muted)">이 데이터셋엔 미측정</td></tr>
   </table>
-  <div class="note"><b>운영 관점:</b> Qwen의 <b>콜드 스타트 78초</b>와 긴 응답(1K tok = 26초)은 공채 시즌 동시 접속에서 대기줄을 만든다(부하테스트: 8명 동시 시 STT 대기 15→42초). Claude는 오토스케일로 이 부류 문제가 없다 — 정확도 격차보다 <b>이 안정성 차이</b>가 클라우드 확정의 더 큰 이유다.</div>
+  <div class="note"><b>운영 관점:</b> Qwen의 <b>콜드 스타트 78초</b>와 긴 응답(1K tok = 26초)은 공채 시즌 동시 접속에서 대기줄을 만든다(부하테스트: 8명 동시 시 STT 대기 15→42초). Claude는 관리형 API 라 LLM 확장은 벤더 쪽에서 이뤄져 이 부류 문제가 없다(서버는 단일 EC2 t3.large — 09-28 정정) — 정확도 격차보다 <b>이 안정성 차이</b>가 클라우드 확정의 더 큰 이유다.</div>
 </div>
 
 <!-- 8. STT 품질 -->

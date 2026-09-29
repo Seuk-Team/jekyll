@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Claude API vs 로컬 Qwen · 비용 비교 · 2026-09-17 (결정 완료)</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
   --bg:#0a0d13; --panel:#111722; --panel2:#0f1420; --line:#1a2130;
@@ -36,7 +36,7 @@ code,.mono{font-family:var(--mono)}
 a{color:var(--cyan)}
 
 .wrap{max-width:1200px;margin:0 auto;padding:24px 20px 80px}
-.hero{background:linear-gradient(135deg,#111722,#0f1420);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:22px}
+.hero{background:linear-gradient(135deg,var(--panel),var(--panel2));color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:22px 24px;margin-bottom:22px}
 .hero .meta{display:flex;flex-wrap:wrap;gap:16px;color:var(--ink-mute);font-size:12px;margin-top:8px}
 .hero .meta b{color:var(--ink-dim);font-weight:500}
 .hero .conclusion{margin-top:16px;padding:14px 16px;background:rgba(34,211,238,.06);border-left:3px solid var(--cyan);border-radius:6px}
@@ -133,14 +133,14 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     아래 세 근거가 결정타다:
     <ul style="margin:8px 0 0;padding-left:20px;line-height:1.9">
       <li><b>① 판단 품질.</b> 채용은 고위험 도메인 — 서류 요약·평가·추천(3단 체인)과 아르 도구 호출의 정확도가 사람 검토의 토대다. 같은 자로 잰 품질에서 Claude 가 상한을 쥐고 있었다(축 ①-B).</li>
-      <li><b>② 서비스 안정성.</b> 관리형 클라우드 위에서 서빙해 자체 하드웨어 운용·재학습·모니터링에 서비스가 묶이지 않는다. 벤더가 SLA 를 진다.</li>
-      <li><b>③ 트래픽 대응(오토스케일).</b> 지원 폭주에도 EC2·Docker Compose 로 수평 확장. 사용량 요금은 비용 절감 설계(기본·경계 질문 캔드 응답 $0 + 회사 프로필 근거)로 눌렀다.</li>
+      <li><b>② 서비스 안정성.</b> LLM 을 관리형 API 로 써서 자체 하드웨어 운용·재학습·모니터링에 서비스가 묶이지 않는다. 모델 서빙은 벤더 몫이다.</li>
+      <li><b>③ 트래픽 대응.</b> LLM 은 관리형 API 라 벤더 쪽에서 확장 · 서버는 단일 EC2(t3.large). 사용량 요금은 비용 절감 설계(기본·경계 질문 캔드 응답 $0 + 회사 프로필 근거)로 눌렀다.</li>
     </ul>
   </div>
 
   <div class="conclusion" style="border-left-color:var(--amber);background:rgba(251,191,36,.07);margin-top:10px">
-    <b style="color:var(--amber)">STT 는 OpenAI Whisper API · Qwen 자체학습은 R&amp;D 자산으로 유지</b> ·
-    음성 전사(STT)는 OpenAI <code>whisper-1</code> API 를 쓴다(ADR-0038 · 분당 $0.006 · 면접당 ~$0.06). 무음 hallucination 은 <code>no_speech_prob</code> 게이트로 완화한다.
+    <b style="color:var(--amber)">STT 는 Whisper — 업로드는 API, 실시간은 로컬(ADR-0038) · Qwen 자체학습은 R&amp;D 자산으로 유지</b> ·
+    음성 전사(STT)는 업로드 답변·재전사·아르 음성 = OpenAI <code>whisper-1</code> API(백엔드가 직접 호출 · 분당 $0.006 · 면접당 ~$0.06), 실시간 면접 전사 = CPU 로컬 faster-whisper 로 갈려 돈다(09-17 운영 실측, <code>STT_BACKEND</code> 빈 값 — ADR-0038 「같은 변수, 두 해석」. 09-18 이후 값은 미확인). 무음 hallucination 은 <code>no_speech_prob</code> 게이트로 완화한다(API 경로에만 적용).
     Qwen3 3갈래 어댑터 자체학습(v9 등 실측치)은 <b>비용 절감 R&amp;D 근거</b>로 남지만, 해커톤 심사 서빙 기준은 <b>클라우드 + Claude</b> 다.
   </div>
 </div>
@@ -211,7 +211,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     <div class="stat">
       <div class="k">단가 · 서울</div>
       <div class="v">$0.647<span class="u">/h</span></div>
-      <div class="n">≈ $15.8/일 (24시간 가동) · t3.large 의 약 5.6배</div>
+      <div class="n">≈ $15.8/일 (24시간 가동 · EBS 100GB 포함) · t3.large 의 약 5.6배</div>
     </div>
     <div class="stat">
       <div class="k">기간</div>
@@ -285,12 +285,12 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
       </tr>
     </tbody>
   </table>
-  <p class="footnote">주의 · <b>v6~v9 = chat 어댑터</b>, <b>summary-2026-09-17 = 요약 전용</b>. 하나의 모델이 세 역할을 겸하지 않는다 — 도메인별 어댑터를 분리해 서빙한다.</p>
+  <p class="footnote">주의 · <b>v6~v9 = chat 어댑터</b>, <b>summary-2026-09-17 = 요약 전용</b>. 하나의 모델이 세 역할을 겸하지 않는다 — 도메인별 어댑터를 분리해 서빙하도록 설계했다(09-18 이후 미서빙).</p>
 
   <div class="callout" style="margin-top:14px">
     <b>정책·경계 · 정직하게 남긴다</b>
     <ul style="margin:8px 0 0;padding-left:20px;line-height:1.9">
-      <li><b>STT 는 OpenAI Whisper API(whisper-1)를 쓴다.</b> 클라우드 서빙 기준의 음성 전사 경로다(ADR-0038). 무음 hallucination 은 <code>no_speech_prob</code> 게이트로 완화한다. faster-whisper large-v3-turbo 는 자체학습·GPU 실측 경로에서 측정한 R&amp;D 자산으로 남는다.</li>
+      <li><b>STT 는 경로별로 갈린다(ADR-0038 「같은 변수, 두 해석」).</b> 업로드 답변·재전사·아르 음성 = OpenAI <code>whisper-1</code> API(백엔드가 직접 호출) · 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측, <code>STT_BACKEND</code> 빈 값. 09-18 이후 값은 미확인). 무음 hallucination 은 <code>no_speech_prob</code> 게이트로 완화한다(API 경로에만 적용). faster-whisper large-v3-turbo(GPU) 는 GPU 실측 경로에서 측정한 R&amp;D 자산으로 남는다.</li>
       <li><b>표정(ViT)은 판정 점수에 안 들어간다.</b> <code>arda-expression-vit</code> 는 UI 표시만(ADR-0029/0032). AI 정책상 감정 인식 채용 활용 금지 → 표정·음성 신호를 Claude 입력에 넣지 않는다. "표정으로 거짓말 판정" 이 아니다.</li>
     </ul>
   </div>
@@ -319,7 +319,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     <div class="stat">
       <div class="k">같은 자(rubric) 격차 축소</div>
       <div class="v"><span style="color:var(--amber)">26.1%</span> → <span style="color:var(--emerald)">73.9%</span></div>
-      <div class="n">09-12 로컬(도메인 미스매치) → v9</div>
+      <div class="n">09-11 로컬 26.1%(도메인 미스매치) / 09-12 Claude 69.6% → v9</div>
     </div>
   </div>
 
@@ -327,7 +327,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     <b>측정 방법 · 셋</b>
     <ol style="margin:8px 0 0;padding-left:20px;line-height:1.9">
       <li><b>도구 호출 pass_rate</b> — 같은 케이스·같은 채점기(<code>judge.py</code>)로 v9 를 재고, fail 사유를 <b>UX정상 / 진짜 실수</b>로 분류. 진짜 실수는 1건뿐.</li>
-      <li><b>같은 자로 Claude vs 로컬 비교</b> — 09-12 측정 Claude 69.6% vs 로컬 26.1%(도메인 미스매치)를, v9 재학습으로 격차 대폭 축소(축 ①-B 표는 09-12 스냅샷 그대로 보존).</li>
+      <li><b>같은 자로 Claude vs 로컬 비교</b> — 09-12 측정 Claude 69.6% vs 09-11 로컬 26.1%(도메인 미스매치)를, v9 재학습으로 격차 대폭 축소(축 ①-B 표는 09-12 스냅샷 그대로 보존).</li>
       <li><b>요약 어댑터 정성 평가</b> — JSON 유효성·gist·key_skills·career_years 항목별 대조.</li>
     </ol>
     <p style="margin:10px 0 0"><b>운영 리허설(우정, 09-17)</b>: 전체 흐름 13분 무중단(공고→지원→서류→면접→분석→채점→합격→메일) · 얼굴 인식 86% · 실시간 판정 57/57 담당자 화면 도착 · 메일 4통 발송. GPU 실측·시연은 <code>arda-gpu · Tesla T4</code> 에서만; 프로덕션 lie-detection 은 여전히 t3.large CPU(int8)이고 <code>VIT_MODEL</code> env 가 없어 표정 판정은 꺼져 있다.</p>
@@ -447,7 +447,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
   <table>
     <thead><tr><th>카테고리</th><th class="num">Claude</th><th class="num">Qwen(09-11)</th><th>관찰</th></tr></thead>
     <tbody>
-      <tr><td>search (7건)</td><td class="num" style="color:var(--emerald)">6/7</td><td class="num" style="color:var(--rose)">0/7</td><td>당시 로컬은 검색 도구 호출을 전혀 못 냈다 · v9 에서 개선된 대표 축</td></tr>
+      <tr><td>search (7건)</td><td class="num" style="color:var(--emerald)">7/7</td><td class="num" style="color:var(--rose)">0/7</td><td>당시 로컬은 검색 도구 호출을 전혀 못 냈다 · v9 에서 개선된 대표 축</td></tr>
       <tr><td>write (5건)</td><td class="num" style="color:var(--rose)">0/5</td><td class="num" style="color:var(--amber)">1/5</td><td><b>Claude 0건은 채점 문제다</b> — 이름만 받으면 <code>search_applications</code> 로 먼저 찾는데, 정답은 쓰기 도구를 바로 부르길 기대</td></tr>
       <tr><td>interview · findings_turn (3건)</td><td class="num" style="color:var(--emerald)">3/3</td><td class="num" style="color:var(--emerald)">3/3</td><td>둘 다 통과 · 인터뷰 chain 은 초기부터 학습됨(→ 지금은 <code>qwen3-arda-interview</code> 전용 어댑터)</td></tr>
       <tr><td>scheduling (2건)</td><td class="num" style="color:var(--emerald)">2/2</td><td class="num" style="color:var(--rose)">0/2</td><td>당시 로컬은 일정 도구 형식 미학습</td></tr>
@@ -480,9 +480,9 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
       <div class="n">기본·경계 질문은 API 미호출 · 회사 프로필 근거</div>
     </div>
     <div class="stat">
-      <div class="k">STT · whisper-1 API</div>
+      <div class="k">STT · whisper-1 API (업로드 경로)</div>
       <div class="v">$0.006<span class="u">/분</span></div>
-      <div class="n">OpenAI Whisper API · 면접당 ~$0.06</div>
+      <div class="n">업로드 답변·재전사·아르 음성 · 면접당 ~$0.06 · 실시간 면접 전사는 CPU 로컬 faster-whisper(09-17 실측 · ADR-0038)</div>
     </div>
   </div>
 
@@ -628,8 +628,8 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
       <table>
         <tbody>
           <tr><td><b>판단 품질</b></td><td><b>결정타.</b> 서류 요약·평가·추천 3단 체인과 도구 호출 정확도가 사람 검토의 토대. 같은 자로 잰 품질에서 Claude 가 상한.</td></tr>
-          <tr><td><b>서비스 안정성</b></td><td>관리형 클라우드·벤더 SLA. 자체 하드웨어 운용·재학습·모니터링에 서비스가 묶이지 않는다.</td></tr>
-          <tr><td><b>트래픽 대응</b></td><td>지원 폭주에도 EC2·Docker Compose 로 수평 확장(오토스케일).</td></tr>
+          <tr><td><b>서비스 안정성</b></td><td>LLM 은 관리형 API · 모델 서빙은 벤더 몫. 자체 하드웨어 운용·재학습·모니터링에 서비스가 묶이지 않는다.</td></tr>
+          <tr><td><b>트래픽 대응</b></td><td>LLM 은 관리형 API 라 벤더 쪽에서 확장 · 서버는 단일 EC2(t3.large).</td></tr>
           <tr><td><b>비용 절감 설계</b></td><td>기본·경계 질문 캔드 응답($0) + 회사 프로필 근거 + 프리픽스 캐시로 사용량 요금을 눌렀다.</td></tr>
           <tr><td><b>R&amp;D 자산 유지</b></td><td>agent_traces·인터뷰 chain 으로 학습한 Qwen 3어댑터(v6→v9)는 비용 절감 근거로 남는다. 데이터가 곧 자산.</td></tr>
         </tbody>
@@ -687,7 +687,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     <tbody>
       <tr>
         <td><b>Anthropic Claude (클라우드)</b></td>
-        <td>품질 상한 높음 · 도구 호출 강 · 관리형 안정성 · 오토스케일 · 즉시 시작</td>
+        <td>품질 상한 높음 · 도구 호출 강 · 관리형 API(확장은 벤더 쪽 · 서버는 단일 EC2) · 즉시 시작</td>
         <td>사용량 요금 지속(캔드 응답·캐시로 완화) · 데이터 처리 고지 필요(사람 최종 검토).</td>
         <td><span class="pill g">✅ 채택</span></td>
       </tr>
@@ -718,7 +718,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     </tbody>
   </table>
 
-  <p class="footnote"><b>결론</b>: 심사·운영 서빙은 <b>클라우드 + Anthropic Claude</b>로 확정. STT 는 OpenAI Whisper API(whisper-1) 사용. 온프레미스 Qwen 3어댑터 자체학습은 비용 절감 R&amp;D 자산으로 유지한다.</p>
+  <p class="footnote"><b>결론</b>: 심사·운영 서빙은 <b>클라우드 + Anthropic Claude</b>로 확정. STT 는 Whisper — 업로드는 API(whisper-1), 실시간은 CPU 로컬 faster-whisper(ADR-0038 · 09-17 운영 실측). 온프레미스 Qwen 3어댑터 자체학습은 비용 절감 R&amp;D 자산으로 유지한다.</p>
 </section>
 
 <!-- ======================== 발표 ======================== -->
@@ -742,7 +742,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
 
   <h3 style="margin-top:22px">중간 슬라이드 (Q&amp;A 예상)</h3>
   <ul style="color:var(--ink-dim);font-size:13px;line-height:1.9;margin:0;padding-left:20px">
-    <li>결정 절 (클라우드 구성 · 판단 엔진 Claude · STT whisper-1 · 표정 판정 예외)</li>
+    <li>결정 절 (클라우드 구성 · 판단 엔진 Claude · STT 업로드 API·실시간 로컬 · 표정 판정 예외)</li>
     <li>성능·측정 (v9 73.9% · 같은 자 격차 축소 · GPU 실측 · 운영 리허설 13분)</li>
     <li>축 ① 비용 실측 (n=21 · 캔드 응답으로 절감)</li>
     <li>축 ⑤ 비-비용 (품질·안정성·트래픽 — 결정을 이끈 축)</li>

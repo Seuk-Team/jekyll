@@ -333,7 +333,7 @@ td.name { font-weight: 600; }
   </div>
   <div style="margin-top:12px;padding:12px 14px;background:rgba(74,222,128,0.08);border-left:3px solid var(--green);border-radius:6px">
     <strong style="color:var(--green)">최종(09-18 반영 · 09-28 확인) · 자료 부족 지원자는 자동 서류 탈락</strong><br>
-    요약이 <code>insufficient: true</code>(분석할 자료가 없음)로 저장된 지원자는 점수 없이 <code>hold</code> 로 남지 않고 <b>자동 서류 탈락</b>하도록 바뀌었다(#349·#351, ADR-0034 확장 · <code>screening.py</code> <code>_summary_insufficient</code>). 문가영·장우진 같은 "요약 대기" 상태가 더는 쌓이지 않는다. 근거는 "판단할 자료가 비어 있음" 이며, AI 가 정리하고 사람이 결정하는 원칙대로 단계 변경은 담당자 몫으로 남는다.
+    요약이 <code>insufficient: true</code>(분석할 자료가 없음)로 저장된 지원자는 점수 없이 <code>hold</code> 로 남지 않고 <b>자동 서류 탈락</b>하도록 바뀌었다(#349·#351, ADR-0034 확장 · <code>screening.py</code> <code>_summary_insufficient</code>). 문가영·장우진 같은 "요약 대기" 상태가 더는 쌓이지 않는다. 근거는 "판단할 자료가 비어 있음" 이다. 적용 대상은 <code>screening_mode=auto</code> 공고의, 아직 <code>applied</code> 단계이고 사람이 옮긴 적 없는 지원자다 — 시스템이 <code>applied→screening→rejected</code> 로 자동 서류 탈락 처리한다(<code>actor_kind=agent</code>, 단계 이력에 사유 기록). 탈락 메일은 이때 보내지 않는다(<code>notify=False</code>) — 코드상 발송 경로는 마감 뒤 일괄 발송용 <code>POST /api/v1/postings/{id}/send-rejections</code>(<code>send_pending_rejections</code>) 하나이며, 이를 부르는 프론트 버튼·스케줄러는 코드에 없다(09-29 확인). 수동 모드 공고는 <code>hold</code> 로 남아 담당자 판단에 맡긴다.
   </div>
 </div>
 
@@ -371,7 +371,7 @@ td.name { font-weight: 600; }
   <div class="finding" style="border-left-color:var(--cyan)">
     <div class="finding-title">같은 자(rubric)로 Claude vs Qwen (R&D 비교)</div>
     <div class="finding-desc">
-      옛 측정에서 Claude <b>69.6%</b> vs Qwen <b>26.1%</b> — 격차의 상당 부분이 <b>도메인 미스매치</b>였다. v9 파인튜닝으로 이 격차를 대폭 축소했다(R&D 실측). 다만 해커톤 심사 서빙 기준은 판단 품질·서비스 안정성·트래픽 대응(오토스케일)을 이유로 <b>클라우드(AWS)+Anthropic Claude</b> 로 확정했고, Qwen 어댑터는 비용 절감 R&D 자산으로 남긴다.
+      옛 측정에서 Claude <b>69.6%</b> vs Qwen <b>26.1%</b> — 격차의 상당 부분이 <b>도메인 미스매치</b>였다. v9 파인튜닝으로 이 격차를 대폭 축소했다(R&D 실측). 다만 해커톤 심사 서빙 기준은 판단 품질·서비스 안정성·트래픽 대응(LLM 은 관리형 API 라 벤더 쪽에서 확장 · 서버는 단일 EC2)을 이유로 <b>클라우드(AWS)+Anthropic Claude</b> 로 확정했고, Qwen 어댑터는 비용 절감 R&D 자산으로 남긴다.
     </div>
   </div>
 </div>

@@ -7,6 +7,8 @@ permalink: /guidelines/
 
 # 주요 개발 수행 지침
 
+> 최종 갱신 2026-09-28 — 인스턴스·STT 경로·헬스체크 간격을 실제 운영값으로 정정(코드는 09-18 동결 그대로).
+
 > **기준 시점: 2026-09-22 · 저장소 `Seuk-Team/Arda` 커밋 `8071fd9`.** 이 문서는 실제 저장소 파일(`pyproject.toml` · `package.json` · `pubspec.yaml` · `.github/workflows/ci.yml` · `docs/00_overview/03-conventions.md` · `07-deploy.md` · `docs/03_decision/` ADR 36편)과 대조해 작성했다. 수치·버전은 그 시점의 값이다.
 
 ## 일반 사항
@@ -24,7 +26,7 @@ permalink: /guidelines/
 
 **계약 우선** — ERD(`01-erd.md`)·API 문서(`02-api.md`)가 전원의 계약이다. 스키마·API 변경은 **코드와 같은 커밋**에서 문서와 alembic 리비전을 함께 갱신해야 하며, 문서 갱신 없는 스키마 변경은 금지한다. 요청·응답의 진실은 Swagger(`/docs`)이고 `02-api.md`는 "무엇이 있는가"만 유지한다. 프론트·앱은 계약 문서로 병렬 개발한다.
 
-**ADR 기반 의사결정** — 기술·범위·윤리 결정 **36건**을 ADR(`docs/03_decision/`)로 남겼다. "안 한 것"에도 ADR이 있다 — Kubernetes 제외(0001), 실시간 공동편집 제외(0005), SQS 워커 폐기(0036). **개정은 원문을 지우지 않고 절을 덧붙인다.** 오너가 개정 ADR을 쓰면 그것으로 확정이며 "팀 확정 대기" 상태를 두지 않는다. 대표 개정 사례 — 표정분석 제외(0002) → 표정·음성 진위 판별 도입(0029, 단 **점수 재료로 쓰지 않음**) · AI는 추천까지(0003) → 서류 단계 자동 판정, 최종 합불만 사람(0034) · AWS 8종 → 3종(0031·0036) · 헥사고날 부분 적용 Bounded Context 4개(0035) · 실시간 전사 OpenAI API(0038).
+**ADR 기반 의사결정** — 기술·범위·윤리 결정 **36건**을 ADR(`docs/03_decision/`)로 남겼다. "안 한 것"에도 ADR이 있다 — Kubernetes 제외(0001), 실시간 공동편집 제외(0005), SQS 워커 폐기(0036). **개정은 원문을 지우지 않고 절을 덧붙인다.** 오너가 개정 ADR을 쓰면 그것으로 확정이며 "팀 확정 대기" 상태를 두지 않는다. 대표 개정 사례 — 표정분석 제외(0002) → 표정·음성 보조 신호 도입(ADR-0029, 단 **점수 재료로 쓰지 않음**) · AI는 추천까지(0003) → 서류 단계 자동 판정, 최종 합불만 사람(0034) · AWS 8종 → 3종(0031·0036) · 헥사고날 부분 적용 Bounded Context 4개(0035) · 실시간 전사 OpenAI API(0038).
 
 주차별 실행 계획은 [개발 일정](/schedule/) 참조.
 
@@ -54,11 +56,11 @@ permalink: /guidelines/
 | **APP** | Flutter (CI 3.44.8 · Dart SDK ^3.12) · `http` · `flutter_secure_storage`(토큰은 Android Keystore) · Android APK | `mobile/pubspec.yaml` |
 | **AI · 판단** | **Anthropic Claude**(`claude-haiku-4-5`) — 서류 요약·평가·추천 3단 체인(ADR-0022) · 아르 도구 호출 에이전트 · 지원자 FAQ. 규칙 의도 라우터가 빈출 요청·기본 질문을 LLM 없이 처리($0) | `backend/app/agent/` |
 | **AI · 검색** | sentence-transformers(ko-sroberta) 임베딩 + pgvector 시맨틱 검색 (ADR-0021) | `backend/app/agent/embedder.py` |
-| **AI · 음성·표정** | OpenAI Whisper API(`whisper-1`) STT — `STT_BACKEND` 값으로 로컬 faster-whisper 전환 가능(ADR-0038) · lie-detection 서비스(Python 3.13 · MediaPipe 얼굴 랜드마크 · ViT 표정 · librosa 음성) — **담당자 화면 참고 지표 전용, 점수 미반영**(ADR-0029·0032) | `ai/lie-detection/` |
+| **AI · 음성·표정** | Whisper STT — 업로드 답변·재전사·아르 음성 = whisper-1 API(백엔드가 직접 호출) · 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측, `STT_BACKEND` 빈 값 — ADR-0038 「같은 변수, 두 해석」. 09-18 이후 값은 미확인) · lie-detection 서비스(Python 3.13 · MediaPipe 얼굴 랜드마크 · ViT 표정 · librosa 음성) — **담당자 화면 참고 지표 전용, 점수 미반영**(ADR-0029·0032) | `ai/lie-detection/` |
 | **AI · R&D 자산** | Qwen3-8B QLoRA 어댑터 3갈래(chat v9 · summary · interview) — 동일 채점기로 학습 전 26.1% → v9 73.9%. 심사 서빙엔 쓰지 않고 `AGENT_*_BACKEND=ollama` 스위치로 교체 가능 | `ai/qwen-training/` |
 | **무결성** | web3 · Ethereum Sepolia 테스트넷 앵커 · OpenTimestamps — 제출물 SHA-256 해시 사슬을 추가 전용 원장에 쌓고 DB 트리거가 수정·삭제를 거부(ADR-0028). 서명 키는 서버 밖(GitHub Actions) | `backend/app/chain.py` |
 | **메일** | n8n 웹훅 + SMTP(지메일 앱 비밀번호) — n8n이 죽어도 API가 5분마다 밀린 메일을 재발송(최대 3회). SES·SQS는 폐기(ADR-0030·0031·0036) | `backend/app/shared/mail_smtp.py` |
-| **INFRA** | Docker Compose(db · api · caddy · lie-detection · n8n) · AWS EC2 t3.medium(서울, Elastic IP, EBS 50GB) · S3(presigned URL 직접 업로드, CORS) · Caddy(443, 인증서 자동) · Vercel(프론트) · systemd 타이머 자동 CD · CloudWatch + SNS 경보 · 매일 S3 DB 백업(30일 수명주기) | `infra/` · `07-deploy.md` |
+| **INFRA** | Docker Compose(db · api · caddy · lie-detection · n8n) · AWS EC2 t3.large(서울, Elastic IP, EBS 50GB) · S3(presigned URL 직접 업로드, CORS) · Caddy(443, 인증서 자동) · Vercel(프론트) · systemd 타이머 자동 CD · CloudWatch + SNS 경보 · 매일 S3 DB 백업(30일 수명주기) | `infra/` · `07-deploy.md` |
 | **CI** | GitHub Actions 5잡 — 백엔드 린트(ruff F) · 백엔드 테스트(alembic upgrade → 모델↔이행 비교 → pytest) · 프론트 빌드·린트(oxlint + tsc -b + vite build) · AI 면접 서버 시험 · 앱 시험(flutter test) | `.github/workflows/ci.yml` |
 
 ### 코드 관리 규칙
@@ -95,7 +97,7 @@ permalink: /guidelines/
 ```
 브라우저 ── https ──> Vercel (frontend/app · main 머지 시 자동 배포 · seuk.suvisdev.cloud)
 브라우저/앱 ── https ──> Caddy(443, 인증서 자동) ──> FastAPI api:8000        ┐
-                                             PostgreSQL 16 + pgvector (db)  ├ EC2 t3.medium · docker compose
+                                             PostgreSQL 16 + pgvector (db)  ├ EC2 t3.large · docker compose
                                              lie-detection (/ai/*)          │   (api.seuk.suvisdev.cloud)
                                              n8n (/n8n/*)                   ┘
 파일: 브라우저 ── presigned URL ──> S3 (서버 미경유 · SSE)
@@ -107,7 +109,7 @@ permalink: /guidelines/
 | 배포 트리거 | `main` 머지 → 서버 systemd 타이머(`arda-deploy.timer`)가 2분마다 확인 → pull → build → `up -d` (`deploy-arda.sh`, 로그 `~/deploy.log`). 백엔드 변경만 api 이미지 재빌드 |
 | 스키마 이행 | 컨테이너 이미지가 기동 시 `alembic upgrade head` 실행 — 호스트 마운트 불필요 |
 | 환경 파일 | `~/arda/.env`(compose: DB 비번 · n8n) + `~/arda/backend/.env`(앱 전체). **값 변경 후 `docker compose up -d --force-recreate`** — `restart`는 env_file을 다시 읽지 않는다 |
-| 관측·경보 | CloudWatch 사용자 지정 지표(디스크·백업 나이·API 헬스) → SNS 메일 · GitHub Actions 15분 외부 헬스체크(실패 시 이슈 자동 개폐) · 컨테이너 로그 상한 20MB×3 |
+| 관측·경보 | CloudWatch 사용자 지정 지표(디스크·백업 나이·API 헬스) → SNS 메일 · GitHub Actions 외부 헬스체크(cron 15분 — 실제 실행 간격은 GitHub 스케줄 지연으로 더 벌어질 수 있음 · 실패 시 이슈 자동 개폐) · 컨테이너 로그 상한 20MB×3 |
 | 백업 | 매일 04:00 KST DB `pg_dump` → gzip 검증 → S3(최소 권한 PutObject) · 30일 자동 만료 |
 | 복구 | EC2 시스템 상태 검사 실패 시 자동 복구 알람 · 컨테이너 `restart: unless-stopped` |
 | 프론트 | Vercel · 환경변수 `VITE_API_BASE` · 백엔드 `CORS_ORIGINS`에 프론트 도메인 필수 |
@@ -124,7 +126,7 @@ permalink: /guidelines/
 | 운영 잠금 | `APP_ENV=production`에서 공개 회원가입 차단 · 기본 시크릿 사용 불가. 오타·미설정도 production으로 잠김 |
 | 데이터 규칙 | 사용자는 삭제하지 않고 비활성화만(이력 보존) · 불합격은 `reason` 없으면 422 · 일괄 변경은 전부 성공 아니면 전체 롤백(409) · 단계 역행은 항상 허용, 전진은 한 칸씩 |
 | AI 정책 | 프롬프트에 주민번호·연락처 등 개인정보 미포함 · **표정·음성 신호는 담당자 참고 지표로만 표시, 점수·합불 판정에 미반영**(ADR-0029) · 최종 합불은 사람이 확정(ADR-0003·0034) · AI 요약은 측정된 수치의 재서술만 허용, 수치에 없는 숫자나 사람을 단정하는 문구가 나오면 문장을 버리고 고정 틀로 대체 |
-| 음성 데이터 경로 | `STT_BACKEND` 값으로 결정 — `openai`면 OpenAI API로 전송, `faster_whisper`면 서버 내 로컬 전사. **빈 값은 백엔드(openai)와 실시간 서버(로컬)가 다르게 읽으므로 반드시 명시**(ADR-0038 「같은 변수, 두 해석」) |
+| 음성 데이터 경로 | `STT_BACKEND` 값으로 결정 — `openai`면 OpenAI API로 전송, `faster_whisper`면 서버 내 로컬 전사. **빈 값은 백엔드(openai)와 실시간 서버(로컬)가 다르게 읽으므로 반드시 명시**(ADR-0038 「같은 변수, 두 해석」) — 09-17 운영 실측은 빈 값이라 업로드는 API, 실시간은 로컬로 갈려 돌았다 |
 | 무결성 | 이력서·자소서 SHA-256을 추가 전용 원장에 해시 사슬로 기록, 트리거가 UPDATE·DELETE·TRUNCATE 거부, 사슬 머리를 Sepolia에 매일 앵커 · 서명 개인키는 서버에 두지 않음(ADR-0028) |
 | 시크릿 | 서버 `.env`에만 · IAM은 서버 전용 유저(최소 권한) · 팀장 개인 키는 전부 폐기 후 팀 발급분으로 교체(ADR-0025) |
 
@@ -137,7 +139,7 @@ permalink: /guidelines/
 | 요구 ID | 항목 | 검수 기준 · 현황(2026-09-22) |
 |---------|------|----------|
 | PER-001 | **성능** — 지원자 검색·필터 | 더미 10만 건 기준 인덱스 튜닝 실측 **111ms → 7.8ms** |
-| PER-002 | **성능** — 실시간 면접 STT | 오디오 청크 1.5초 예산 안에 전사 (GPU 실측 275ms/3초 음성 · API 경로) |
+| PER-002 | **성능** — 실시간 면접 STT | 오디오 청크 1.5초 예산 안에 전사 (09-17 GPU 벤치 Tesla T4 275ms/3초 음성 — 운영 실시간 전사는 CPU 로컬) |
 | QUA-001 | **테스트** — 자동화 | CI에서 push·PR마다 백엔드 pytest(실제 PostgreSQL+pgvector, alembic 이행 후) · 프론트 oxlint + tsc + build · 앱 flutter test · AI 서버 pytest 전부 초록이어야 머지 |
 | QUA-002 | **문서화** — API | FastAPI Swagger `/docs`에서 전체 API 명세(107 라우트) 조회 가능 |
 | QUA-003 | **문서화** — 스키마 | 모델↔alembic 이행 결과를 CI가 비교해 이행 누락을 잡는다(2026-09-17) |

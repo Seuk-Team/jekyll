@@ -88,7 +88,7 @@ details.kb-card[open] .kb-more { opacity: 0.5; }
 <details markdown="1" class="kb-rules">
 <summary>📖 사용 규칙 보기 (카드 편집 방법 · 충돌 방지)</summary>
 
-카드는 `_data/kanban/<자기 GitHub 아이디>.yml`에서만 편집한다 — 한 사람이 파일 하나를 소유하므로 5명이 동시에 작업해도 git 충돌이 나지 않는다.
+카드는 `_data/kanban/<자기 GitHub 아이디>.yml`에서만 편집한다 — 한 사람이 파일 하나를 소유하므로 4명이 동시에 작업해도 git 충돌이 나지 않는다.
 
 1. **자기 파일만 수정한다.** 본인 소유 파일 외에는 손대지 않는다. 남의 카드에 할 말이 있으면 팀 채널로.
 2. **카드 형식**은 파일 안 기존 항목을 복사해서 쓴다. `status`는 `todo | doing | done` 세 값만.

@@ -13,6 +13,9 @@ permalink: /
 3축 자동 서류 심사, 칸반 보드, 도구 호출 에이전트 '아르', RAG 검색, AI 면접 실시간 분석, 제출물 무결성 원장까지 — 채용 프로세스를 하나의 플랫폼에서 자동화합니다. 최종 합불은 사람이 확정합니다.
 {: .fs-5 .fw-300 }
 
+최종 갱신 2026-09-28
+{: .fs-3 }
+
 [목차 보기](/toc/){: .btn .btn-primary .fs-5 .mb-4 .mb-md-0 .mr-2 }
 [GitHub](https://github.com/Seuk-Team/jekyll){: .btn .fs-5 .mb-4 .mb-md-0 }
 
@@ -43,4 +46,7 @@ permalink: /
 | 6 | 운영·모델 전략 | Docker · AWS 자동 CD(2분 폴링) · CI 5잡 · 경보·백업 · 헥사고날 4 컨텍스트 · **Qwen 자체학습 vs Claude 동일 채점기 비교 → 클라우드 + Claude 확정** | ✅ 완료 |
 
 **규모(09/22)**: API 107 · 테이블 28 · pytest 1,165건 · 앱 테스트 30파일 · ADR 36편 · 커밋 1,095 · 필수 기능 27/27 · 자체학습 chat v9 73.9%
+{: .fs-3 }
+
+09-18 코드 동결 · 09-20 과제 제출 완료 · 심사는 [seuk.suvisdev.cloud](https://seuk.suvisdev.cloud)(클라우드 + Claude)
 {: .fs-3 }

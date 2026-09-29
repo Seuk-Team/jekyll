@@ -79,14 +79,14 @@ td{border-bottom:1px solid var(--line-soft);padding:7px 8px;vertical-align:top}
 </style>
 </head>
 <body>
-<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 최종 갱신 2026-09-28 — 해커톤 제출(09-20) 뒤 코드 동결 상태(main 8071fd9) 기준 최종판</b><br>온프레미스(학원 PC 3대 · arda.suvisdev.cloud · Cloudflare Tunnel · 로컬 Qwen)는 <b>2026-09-18 폐쇄</b>됐다. 심사·운영은 <b>클라우드 seuk.suvisdev.cloud</b>(API api.seuk.suvisdev.cloud · AWS t3.large · 컨테이너 5개 api·db·caddy·n8n·lie-detection)에서 돌고, 판단 LLM 은 <b>Anthropic Claude</b>, STT 는 <b>두 갈래</b>다 — 업로드 답변·재전사·아르 음성 = OpenAI whisper-1 API, 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측 <code>STT_BACKEND</code> 빈 값 · ADR-0038 「같은 변수, 두 해석」 · 09-18 이후 .env 는 미확인). 자체 학습 Qwen 어댑터는 시연 경로에서 빠졌고 연구·비교 자료로만 남는다. 09-20 이후 커밋·PR 0건 · 09-28 기준 전 컨테이너 정상 가동. 본문 중 온프레미스/자체 서빙/"Claude API 미의존" 서술은 당시 기록이다. <span style="opacity:.8">(09-18 「클라우드 전환」 안내를 이 칸으로 합쳤다.)</span></div>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 최종 갱신 2026-09-28 — 해커톤 제출(09-20) 뒤 코드 동결 상태(main 8071fd9) 기준 최종판</b><br>온프레미스(학원 PC 3대 · arda.suvisdev.cloud · Cloudflare Tunnel · 로컬 Qwen)는 <b>2026-09-18 폐쇄</b>됐다. 심사·운영은 <b>클라우드 seuk.suvisdev.cloud</b>(API api.seuk.suvisdev.cloud · AWS t3.large · 컨테이너 5개 api·db·caddy·n8n·lie-detection)에서 돌고, 판단 LLM 은 <b>Anthropic Claude</b>, STT 는 <b>두 갈래</b>다 — 업로드 답변·재전사·아르 음성 = OpenAI whisper-1 API, 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측 <code style="background:rgba(255,255,255,.12);color:inherit">STT_BACKEND</code> 빈 값 · ADR-0038 「같은 변수, 두 해석」 · 09-18 이후 .env 는 미확인). 자체 학습 Qwen 어댑터는 시연 경로에서 빠졌고 연구·비교 자료로만 남는다. 09-20 이후 커밋·PR 0건 · 09-28 기준 전 컨테이너 정상 가동. 본문 중 온프레미스/자체 서빙/"Claude API 미의존" 서술은 당시 기록이다. <span style="opacity:.8">(09-18 「클라우드 전환」 안내를 이 칸으로 합쳤다.)</span></div>
 
 <div class="wrap">
 <header>
   <div class="eyebrow">Seuk-Team · Arda ATS · <b>2026-09-17 갱신판</b></div>
   <h1>Arda 기술 해부 노트</h1>
   <p class="lede">09-10 오전 해부노트에 <b>오후~저녁 인터뷰방 대공사</b>를 반영한 갱신판. 이 문서는 새로 만들어지거나 크게 바뀐 기술만 다룬다. 오전 노트의 나머지 기술(FastAPI · SQLAlchemy · alembic · PostgreSQL+pgvector · JWT · S3 · 메일 파이프라인 · 해시 사슬 · 인프라 · 클라이언트 등)은 그대로 유효하다. 여기에는 <b>오늘 오후 이후 코드가 바뀐 자리만</b> 정리한다.</p>
-  <div class="meta"><span>저장소 <code>Seuk-Team/Arda</code></span><span>서비스 <code>seuk.suvisdev.cloud</code></span><span>오늘 머지 PR <b>13</b>건</span></div>
+  <div class="meta"><span>저장소 <code>Seuk-Team/Arda</code></span><span>서비스 <code>seuk.suvisdev.cloud</code></span><span>오늘 머지 PR <b>12</b>건</span></div>
   <nav class="toc" aria-label="목차">
     <a href="#s0">0. 오늘 저녁 · 한눈에</a><a href="#s1">1. 자동 질문 생성</a><a href="#s2">2. 꼬리질문 백그라운드</a><a href="#s3">3. ViT 표정 파이프라인</a><a href="#s4">4. STT 180초</a><a href="#s5">5. 세션 삭제</a><a href="#s6">6. 불합격 사유 UI</a><a href="#s7">7. 배포 · torch CPU-only</a><a href="#s8">8. ADR-0028 §1.7</a><a href="#s9">9. 잠긴 원장 뚫기</a>
   </nav>
@@ -115,7 +115,7 @@ ADR-0035 헥사고날 부분 적용(PR #184~#209)으로 <code>backend/app/</code
 
 <!-- ═══════════════════ 0. 한눈에 ═══════════════════ -->
 <section id="s0">
-<h2>0. 오늘 저녁 · 한 눈에<small>PR 13개가 하루 오후~저녁에 · 인터뷰방을 시연 가능한 완성도로</small></h2>
+<h2>0. 오늘 저녁 · 한 눈에<small>PR 12개가 하루 오후~저녁에 · 인터뷰방을 시연 가능한 완성도로</small></h2>
 
 <div class="hero"><b>서사</b> — 아침엔 fit-check 24명이 옛 자소서로 접수돼 있었다. 저녁까지 <b>인터뷰 흐름 5개 축이 모두 자동화 · 표정 · 판정 근거</b> 를 갖추게 했다. 그 사이 배포 파이프라인이 며칠째 죽어 있던 것을 <b>디스크 확장 + torch CPU-only</b> 두 갈래로 되살렸고, ADR-0028 무결성 원장을 실제로 한 번 뚫었다가 "우회의 흔적을 남긴다" 절을 문서에 새로 얹었다.</div>
 

@@ -100,10 +100,10 @@
   </ul>
 
   <h3>1-2. AI 스택 (당시 직접 학습 모델)</h3>
-  <p class="muted">아래는 온프레 당시 구성이다. 심사·운영 서빙은 클라우드 Anthropic Claude(요약·평가·추천 3단 체인·도구 호출·FAQ)로 확정됐고, STT 는 OpenAI <code>whisper-1</code> API 를 쓴다. Qwen3 어댑터 3종은 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 보존한다.</p>
+  <p class="muted">아래는 온프레 당시 구성이다. 심사·운영 서빙은 클라우드 Anthropic Claude(요약·평가·추천 3단 체인·도구 호출·FAQ)로 확정됐다. STT 는 업로드 답변·재전사·아르 음성 = OpenAI <code>whisper-1</code> API, 실시간 면접 전사 = CPU 로컬 faster-whisper 로 갈려 돈다(09-17 운영 실측, ADR-0038 「같은 변수, 두 해석」 — <a href="#s7">§7-1</a>). Qwen3 어댑터 3종은 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 보존한다.</p>
   <ul>
     <li><b>Ollama + qwen3:8b + LoRA 어댑터</b>(PC1 GPU 상주): <code>arda-agent</code>(채팅·도구) <b>v9</b> · <code>arda-interview</code>(면접) v6 · <code>arda-summary</code>(서류요약 전용) <b>v1</b></li>
-    <li><b>STT</b>: PC2 lie-detection 이 faster-whisper <code>large-v3-turbo</code>(int8, CPU). (현재 AWS 운영 STT 는 OpenAI <code>whisper-1</code> API)</li>
+    <li><b>STT</b>: PC2 lie-detection 이 faster-whisper <code>large-v3-turbo</code>(int8, CPU). (현재 AWS 운영 STT 는 업로드 답변 = OpenAI <code>whisper-1</code> API, 실시간 면접 전사 = CPU 로컬 faster-whisper — <a href="#s7">§7-1</a>)</li>
     <li><b>표정 ViT</b>: <code>cloverky/arda-expression-vit</code>(CPU) · 얼굴 랜드마크는 MediaPipe(CPU)</li>
   </ul>
 
@@ -185,14 +185,27 @@
   <h2><span class="n">4.</span>AWS 전환 시 반영할 것 <span class="badge b-good">반영 완료</span></h2>
   <p class="muted">09-18 당시 계획. 09-28 확인: 동결 직전에 <code>Seuk-Team/Arda</code> 에 전부 머지·배포됐다 — 데모 로그인 #333(담당자·지원자 버튼, <code>?demo=</code> 자동로그인), 시연계정 잠금 #335·#343, 데모 지원자 로그인마다 초기화 #338·#342. 상세는 §7.</p>
   <div class="card">
-    <h3 style="margin-top:0">심사자용 데모 로그인</h3>
+    <h3 style="margin-top:0">4-1. 심사자용 데모 로그인</h3>
     <ul>
       <li><b>코드</b>: <code>Login.tsx</code>(데모 버튼 + <code>?demo=</code> 자동로그인) + 백엔드 <code>DEMO_LOCKED</code>(시연계정 비번/역할 잠금). → <b>Seuk-Team/Arda PR #333</b>(오너 허가). 머지 시 AWS auto-CD 배포</li>
       <li><b>운영 전제(AWS DB)</b>: 심사자용 데모 계정(담당자·지원자)이 존재해야 하며, 로그인 화면의 데모 버튼으로 접속한다(자격증명은 이 문서에 남기지 않음) + <code>DEMO_LOCKED_EMAILS</code> env. 지원자 비번 로그인 백엔드는 이미 upstream 有</li>
     </ul>
+    <h3>4-2. AWS 가 이미 가진 것 (확인)</h3>
+    <ul>
+      <li>AWS EC2 <code>~/arda</code>(Seuk-Team origin/main, 09-18 당시 HEAD <code>75d2d1a</code> — 최종 <code>8071fd9</code>), auto-CD <code>deploy-arda.sh</code>(2분 폴링 → ff-merge → build → up). compose 서비스 api·db·caddy·n8n·lie-detection</li>
+    </ul>
   </div>
 
-  <h2><span class="n">5.</span>온프레미스에서 실제로 검증된 것 (성과)</h2>
+  <h2 id="s5"><span class="n">5.</span>보존 자산 (바탕화면 · PC1)</h2>
+  <div class="card">
+    <ul>
+      <li><code>Desktop\arda\온프레미스\</code> — 이 문서 + 이전 구성보고·반영흐름 + <code>stt_repro</code>(STT 재현) + <code>tools</code>(요약 재생성·파일적재·복원 스크립트)</li>
+      <li>PC1: 학습 어댑터(<code>/var/lib/ollama/adapters</code>), GPU 이미지(<code>arda-lie-detection:gpu</code>), file_blobs, 복원 백업(<code>~/backup</code>)</li>
+      <li>코드: <code>Seuk-Hackathon/arda</code>(해커톤 repo) — 온프레 관련 커밋 전부 여기 보존. <b>온프레 전용 작업 중 Seuk-Team 으로 옮긴 것은 데모로그인(+시연계정 잠금)뿐.</b></li>
+    </ul>
+  </div>
+
+  <h2 id="s6"><span class="n">6.</span>온프레미스에서 실제로 검증된 것 (성과)</h2>
   <div class="card">
     <p class="muted">프리즈 배포 자체는 <b>동작</b>했다 — 폐쇄는 "안 됨"이 아니라 "심사 안정성 대비 유지비용" 판단이다.</p>
     <ul>
@@ -229,7 +242,7 @@
   <div class="card">
     <ul>
       <li>컨테이너 5개(api · db · caddy · n8n · lie-detection) <span class="badge b-good">모두 정상 가동</span></li>
-      <li>GitHub Actions: CI · 외부 헬스체크(수시간 간격, api·front 200 확인, 실패 시 이슈 자동 생성) · 무결성 앵커 게시(매일) — <span class="badge b-good">09-18 이후 전부 성공</span></li>
+      <li>GitHub Actions: CI · 외부 헬스체크(cron 15분 <code>*/15</code> — 실제 실행 간격은 GitHub 스케줄 지연으로 수시간까지 벌어짐, api·front 200 확인, 실패 시 이슈 자동 생성) · 무결성 앵커 게시(매일) — <span class="badge b-good">09-18 이후 전부 성공</span></li>
     </ul>
   </div>
 

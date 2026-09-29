@@ -226,7 +226,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
   <p style="margin-top: 8px; font-size: 14px; color: var(--text-dim); line-height: 1.7;">
     <strong style="color: var(--amber);">이 소개서는 클라우드(AWS · <code>seuk.suvisdev.cloud</code>)에서 Anthropic Claude 기반으로 심사·운영하는 현재 기준으로 정리했다.</strong>
     <b>메인 판단 엔진은 Anthropic Claude</b> — 서류 요약·평가·추천(3단 체인)·아르 도구 호출·FAQ 를 담당한다.
-    이유: 판단 품질·서비스 안정성·트래픽 대응(오토스케일). Qwen3 어댑터 3갈래는 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 남지만, 심사 서빙에는 클라우드 + Claude 를 쓴다.
+    이유: 판단 품질·서비스 안정성·트래픽 대응(LLM 은 관리형 API 라 벤더 쪽에서 확장 · 서버는 단일 EC2). Qwen3 어댑터 3갈래는 직접 학습(Colab QLoRA)한 완결 R&D 자산으로 남지만, 심사 서빙에는 클라우드 + Claude 를 쓴다.
   </p>
 </div>
 
@@ -234,11 +234,11 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
   <div style="font-family: var(--mono); font-size: 13px; color: var(--cyan); letter-spacing: 0.04em; font-weight: 600;">● 2026-09-17 갱신</div>
   <p style="margin-top: 8px; font-size: 14px; color: var(--text-dim);">이 소개서 v1(2026-09-11) 이후 달라진 핵심:</p>
   <ul style="font-size: 13.5px; color: var(--text-dim); line-height: 1.7; margin: 6px 0 0; padding-left: 18px;">
-    <li><strong style="color: var(--green);">클라우드(AWS)·Anthropic Claude 기반으로 심사·운영 확정</strong>(2026-09-18). 판단 품질·안정성·트래픽 대응이 이유. Qwen3 어댑터 3갈래 직접 학습(Colab QLoRA·R&D)도 완결(agent v9 pass_rate 73.9% · 17/23)했으나 심사 서빙에는 클라우드 + Claude 를 쓴다.</li>
+    <li><span style="color: var(--text-mute);">(09-18 추가)</span> <strong style="color: var(--green);">클라우드(AWS)·Anthropic Claude 기반으로 심사·운영 확정</strong>(2026-09-18). 판단 품질·안정성·트래픽 대응이 이유. Qwen3 어댑터 3갈래 직접 학습(Colab QLoRA·R&D)도 완결(agent v9 pass_rate 73.9% · 17/23)했으나 심사 서빙에는 클라우드 + Claude 를 쓴다.</li>
     <li><strong>헥사고날 부분 적용 완결</strong>(ADR-0035 · PR #184~#209) — 5개 Bounded Context + 포트/어댑터. 리팩터 후 전수 점검으로 고장 11건 발견·수정.</li>
-    <li><strong>STT는 OpenAI whisper-1 API로 면접 답변을 전사한다</strong>. 무음 hallucination 은 no_speech_prob 게이트로 완화(ADR-0038).</li>
+    <li><strong>STT 는 Whisper — 업로드는 API, 실시간은 로컬(ADR-0038)</strong>. 업로드 답변·재전사·아르 음성 = whisper-1 API(백엔드가 직접 호출) · 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측, <code>STT_BACKEND</code> 빈 값 — ADR-0038 「같은 변수, 두 해석」. 09-18 이후 값은 미확인). 무음 hallucination 은 no_speech_prob 게이트로 완화(API 경로에만 적용).</li>
     <li><strong>신규 기능</strong> — 아르 챗 이력서 드래그·드롭 접수(#326), 같은 사람 재접수 이력서 변동 diff(#327), 탈락 축(서류/면접/종합) 빨간 표시(#328), 면접 중 실시간 분석 요약(#325).</li>
-    <li><strong>규모(09-17 당시)</strong> — 백엔드 테스트 1072개 · API 107개 · DB 테이블 28개 · ADR 38개 · 최신 PR #328. 제출 마감 <strong style="color: var(--amber);">2026-09-20</strong>(프리즈 태그 <code>hackathon-final-2026-09-20</code>). 최종 수치는 아래 카드.</li>
+    <li><strong>규모(09-17 당시)</strong> — 백엔드 테스트 1072개 · API 107개 · DB 테이블 28개 · ADR 36편(번호 0001~0038) · 최신 PR #328. 제출 마감 <strong style="color: var(--amber);">2026-09-20</strong>(프리즈 태그 <code>hackathon-final-2026-09-20</code>). 최종 수치는 아래 카드.</li>
   </ul>
 </div>
 
@@ -246,7 +246,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
   <div class="num-card"><div class="num">1165</div><div class="num-label">백엔드 테스트 (09-18 마지막 기록)</div></div>
   <div class="num-card"><div class="num">107</div><div class="num-label">API 엔드포인트</div></div>
   <div class="num-card"><div class="num">28</div><div class="num-label">DB 테이블</div></div>
-  <div class="num-card"><div class="num">38</div><div class="num-label">ADR</div></div>
+  <div class="num-card"><div class="num">36</div><div class="num-label">ADR (번호 0001~0038 · 0018~0020 결번 · 0030 두 건)</div></div>
 </div>
 
 <h2><span class="icon">📖</span> 무엇을 만드는가</h2>
@@ -272,7 +272,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
   <div class="feature">
     <span class="icon">🎥</span>
     <div class="name">AI 면접</div>
-    <div class="desc">지원자가 앱에서 답변 → STT(whisper-1) 로 받아쓰기 · <strong>답변-서류 일관성 대조</strong> + 보조 신호(표정 top-3 · 음성 지표)를 담당자 화상 방에 표시 · 실시간 분석 수치는 요약해 종합평가로. <strong>AI 가 정리하고 사람이 결정</strong>.</div>
+    <div class="desc">지원자가 앱에서 답변 → STT 로 받아쓰기(업로드는 whisper-1 API · 실시간은 로컬 faster-whisper) · <strong>답변-서류 일관성 대조</strong> + 보조 신호(표정 top-3 · 음성 지표)를 담당자 화상 방에 표시 · 실시간 분석 수치는 요약해 종합평가로. <strong>AI 가 정리하고 사람이 결정</strong>.</div>
   </div>
   <div class="feature">
     <span class="icon">📄</span>
@@ -346,8 +346,8 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
     </tr>
     <tr>
       <td><strong>전사 (STT)</strong><br><span style="color: var(--text-mute); font-size: 12px;">면접 답변 받아쓰기</span></td>
-      <td><span class="tag cyan">OpenAI Whisper API</span><br><span style="color: var(--text-mute); font-size: 12px;">(whisper-1)</span></td>
-      <td>OpenAI <code>whisper-1</code> API 로 면접 답변 전사 · 무음 hallucination 은 no_speech_prob 게이트로 완화(ADR-0038)</td>
+      <td><span class="tag cyan">OpenAI Whisper API</span><br><span style="color: var(--text-mute); font-size: 12px;">(whisper-1 · 업로드)</span><br><span class="tag green">faster-whisper(로컬)</span><br><span style="color: var(--text-mute); font-size: 12px;">(CPU · 실시간)</span></td>
+      <td>업로드 답변·재전사·아르 음성 = OpenAI <code>whisper-1</code> API(백엔드가 직접 호출) · 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측, <code>STT_BACKEND</code> 빈 값 — ADR-0038 「같은 변수, 두 해석」. 09-18 이후 값은 미확인) · 무음 hallucination 은 no_speech_prob 게이트로 완화(API 경로에만 적용)</td>
     </tr>
     <tr>
       <td><strong>표정</strong><br><span style="color: var(--text-mute); font-size: 12px;">얼굴 표정 7분류</span></td>
@@ -392,14 +392,14 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
 
 <h3>백엔드</h3>
 <div class="four-col">
-  <div class="stack-item"><div class="stack-name">Python 3.13</div><div class="stack-role">runtime</div></div>
+  <div class="stack-item"><div class="stack-name">Python 3.12</div><div class="stack-role">runtime</div></div>
   <div class="stack-item"><div class="stack-name">FastAPI</div><div class="stack-role">API</div></div>
   <div class="stack-item"><div class="stack-name">SQLAlchemy</div><div class="stack-role">ORM</div></div>
   <div class="stack-item"><div class="stack-name">Alembic</div><div class="stack-role">마이그레이션</div></div>
   <div class="stack-item"><div class="stack-name">Anthropic Claude</div><div class="stack-role">메인 판단 엔진</div></div>
   <div class="stack-item"><div class="stack-name">Ollama</div><div class="stack-role">Qwen3 어댑터 R&D</div></div>
   <div class="stack-item"><div class="stack-name">JWT</div><div class="stack-role">인증</div></div>
-  <div class="stack-item"><div class="stack-name">pytest</div><div class="stack-role">테스트 1072개</div></div>
+  <div class="stack-item"><div class="stack-name">pytest</div><div class="stack-role">테스트 1,165개(09-18 기록)</div></div>
 </div>
 
 <h3>데이터</h3>
@@ -412,7 +412,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
 
 <h3>프론트 · 앱</h3>
 <div class="four-col">
-  <div class="stack-item"><div class="stack-name">React 18</div><div class="stack-role">웹 (담당자)</div></div>
+  <div class="stack-item"><div class="stack-name">React 19</div><div class="stack-role">웹 (담당자)</div></div>
   <div class="stack-item"><div class="stack-name">TypeScript</div><div class="stack-role">타입 안정</div></div>
   <div class="stack-item"><div class="stack-name">Vite</div><div class="stack-role">빌드</div></div>
   <div class="stack-item"><div class="stack-name">CSS Modules</div><div class="stack-role">스타일</div></div>
@@ -425,7 +425,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
 <h3>AI 서비스</h3>
 <div class="four-col">
   <div class="stack-item"><div class="stack-name">Anthropic Claude</div><div class="stack-role">판단·요약·FAQ</div></div>
-  <div class="stack-item"><div class="stack-name">OpenAI Whisper API</div><div class="stack-role">STT(whisper-1)</div></div>
+  <div class="stack-item"><div class="stack-name">Whisper (API · 로컬)</div><div class="stack-role">STT · 업로드 whisper-1 API · 실시간 faster-whisper</div></div>
   <div class="stack-item"><div class="stack-name">ViT (Google)</div><div class="stack-role">표정(표시만)</div></div>
   <div class="stack-item"><div class="stack-name">MFCC + MLP</div><div class="stack-role">음성 지표</div></div>
 </div>
@@ -559,7 +559,7 @@ code { font-family: var(--mono); background: var(--bg-2); padding: 1px 6px; bord
         <li>09-18~28 실사용: 아르 누적 62턴 · 누적 비용 <b>$0.72</b>(09-09~28) · 메일 13건 전부 발송 · 컨테이너 5개 정상</li>
         <li>10-14~10-27 g4dn.xlarge(T4) 24시간 풀가동 계획(확정·미실행) · 심사 종료 후에만 <code>.env</code> 스위치 변경</li>
         <li>제품 시연 10-27</li>
-        <li>남은 과제(동결로 보류): STT 무음 hallucination 완화, 표정 판정 벡터 이관(100→107차원), 요약 어댑터 career_years 오차(R&amp;D)</li>
+        <li>남은 과제(동결로 보류): STT 로컬 경로 정확도 개선(무음 hallucination 게이트는 API 경로만 적용), 표정 판정 벡터 이관(100→107차원), 요약 어댑터 career_years 오차(R&amp;D)</li>
       </ul>
     </div>
   </div>
