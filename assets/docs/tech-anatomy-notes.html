@@ -79,7 +79,7 @@ td{border-bottom:1px solid var(--line-soft);padding:7px 8px;vertical-align:top}
 </style>
 </head>
 <body>
-<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 최종 갱신 2026-09-28 — 해커톤 제출(09-20) 뒤 코드 동결 상태(main 8071fd9) 기준 최종판</b><br>온프레미스(학원 PC 3대 · arda.suvisdev.cloud · Cloudflare Tunnel · 로컬 Qwen)는 <b>2026-09-18 폐쇄</b>됐다. 심사·운영은 <b>클라우드 seuk.suvisdev.cloud</b>(API api.seuk.suvisdev.cloud · AWS t3.large · 컨테이너 5개 api·db·caddy·n8n·lie-detection)에서 돌고, 판단 LLM 은 <b>Anthropic Claude</b>, STT 는 <b>두 갈래</b>다 — 업로드 답변·재전사·아르 음성 = OpenAI whisper-1 API, 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측 <code>STT_BACKEND</code> 빈 값 · ADR-0038 「같은 변수, 두 해석」 · 09-18 이후 .env 는 미확인). 자체 학습 Qwen 어댑터는 시연 경로에서 빠졌고 연구·비교 자료로만 남는다. 09-20 이후 커밋·PR 0건 · 09-28 기준 전 컨테이너 정상 가동. 본문 중 온프레미스/자체 서빙/"Claude API 미의존" 서술은 당시 기록이다. <span style="opacity:.8">(09-18 「클라우드 전환」 안내를 이 칸으로 합쳤다.)</span></div>
 
 <div class="wrap">
 <header>
@@ -94,8 +94,14 @@ td{border-bottom:1px solid var(--line-soft);padding:7px 8px;vertical-align:top}
 <div class="note new" style="margin:16px 0"><b>2026-09-17 갱신 · 이 문서(09-10 저녁 인터뷰방 기록)를 최신으로 맞춘 요점</b><br>
 ① <b>헥사고날 부분 적용 완결</b> — ADR-0035 · PR #184~#209 · 5개 Bounded Context(application·interview·hiring·talent·shared) + 포트/어댑터. <b>Full DDD 아님.</b> 이관 직후 전수 점검에서 <b>테스트는 전부 초록인데 실제로 깨져 있던 고장 11건</b>을 찾아 고쳤다(배포 진입점·함수 안 import·로그 경로가 사각지대). 상세는 자매 문서 「아키텍처 리팩터 보고서 2026-09-17」.<br>
 ② <b>클라우드 서빙 확정</b> — 판단 엔진은 AWS 위에서 Anthropic Claude 로 서빙한다. 서류 요약·평가·추천(3단 체인) · 아르 에이전트 도구 호출 · 지원자/담당자 FAQ 를 모두 Claude 가 담당한다. 사내에서 학습했던 Qwen3 어댑터(agent v9 등)는 완결된 R&D 자산으로 남는다. 아래 본문의 "Claude Haiku 콜당 비용" 류 서술은 작성 시점 기록이다.<br>
-③ <b>STT 경로</b> — OpenAI whisper-1 실시간 전사(ADR-0038)로 서빙한다. 무음 구간 hallucination 은 <code>no_speech_prob</code> 게이트로 완화했다. 로컬 faster-whisper large-v3-turbo 경로는 폴백으로 코드에 남아 있고 실측 당시의 기록으로 §4 에 둔다. §4 참조.<br>
+③ <b>STT 경로</b> — ADR-0038 은 실시간 전사도 OpenAI whisper-1 API 로 보내는 설계다. <span class="tag t-new">09-28 정정</span> 다만 09-17 운영 실측에서 <code>STT_BACKEND</code> 가 빈 값이라 <b>업로드 답변·재전사·아르 음성 = whisper-1 API, 실시간 면접 전사 = CPU 로컬 faster-whisper</b> 로 갈려 돌았다(ADR-0038 「같은 변수, 두 해석」 · 09-18 이후 .env 미확인). §4 의 CPU 180초 상한 논리는 그래서 실시간 경로에 그대로 걸려 있었다. API 경로의 무음 hallucination 은 <code>no_speech_prob</code> 게이트로 완화했다. §4 참조.<br>
 ④ <b>결정</b> — ADR-0036 SQS 워커 폐기 · ADR-0037 회사 통합 API · ADR-0038 실시간 전사. <b>규모(09-17 실측)</b>: 백엔드 테스트 <b>1072개</b> · API <b>107개</b> · DB 테이블 <b>28개</b> · ADR <b>0001~0038</b> · 최신 PR <b>#328</b>.</div>
+<div class="note" style="margin:16px 0"><b>● 2026-09-28 최종 — 동결 시점(main <code>8071fd9</code> · 마지막 PR #354) 기준으로 이 노트에 걸리는 변화</b><br>
+① <b>비용 절감 장치</b> — 아르의 인사·능력·사용법 발화(#334)와 지원자 FAQ 의 기본·경계 질문(#347)은 캔드 응답으로 LLM 을 우회한다($0). 지원자 FAQ 는 회사 프로필도 근거로 답한다(#348). 무관 질문 거절은 '데이터 근거' 기준으로 명확화(#353). 심사 기간 실측: 아르 누적 62턴 · 누적 비용 <b>$0.72</b>(09-09~09-28).<br>
+② <b>§6 불합격 사유 UI 의 자매 기능</b> — 자료 부족(요약 <code>insufficient</code>) 지원자도 자동 서류 탈락(#349, ADR-0034 확장)하고, 자동 탈락은 <code>screening</code> 단계를 거쳐 화면에 "서류 탈락"으로 뜬다(#351). 탈락 축(서류/면접/종합)은 빨간색으로 표시(#328). 안내 메일은 기존대로 마감 뒤 일괄.<br>
+③ <b>§5 세션 · 면접방</b> — 세션 생성 때 면접 링크 메일이 함께 발행된다(#340). 심사위원 데모 지원자는 로그인마다 인적성·면접일정·AI면접이 초기화된다(#338·#342).<br>
+④ <b>§8 ADR-0028 §1.7 세 갈래</b>는 코드 동결(09-20)까지 구현되지 않았다 — 문서상 방향으로 남는다(§8 참조).<br>
+⑤ 09-20 이후 커밋·PR 0건. 아래 본문은 동결 상태 그대로 읽으면 된다.</div>
 <div class="note warn" style="margin:16px 0"><b>2026-09-12 · 이 문서의 코드 경로가 바뀌었다</b><br>
 ADR-0035 헥사고날 부분 적용(PR #184~#209)으로 <code>backend/app/</code> 이 Bounded Context 폴더로 재편됐다. <b>옛 경로로 import 하면 <code>ModuleNotFoundError</code></b> 가 난다. 아래 본문의 파일 경로는 작성 시점 기록으로 읽고, 실제 위치는 이 표로 환산한다:<br>
 <code>app/api/interviews.py</code> → <b><code>app/interview/api/interviews.py</code></b> ·
@@ -227,7 +233,7 @@ db.add(InterviewTurn(session_id=session_id, seq=max_seq + 1,
 <li><b>20자 미만 답변은 즉시 None</b>. "파이썬입니다" 같은 짧은 답변에 억지 꼬리 붙이면 면접관에게 해롭다 (interview_probe.py 원본 정책 그대로).</li>
 <li><b>SKIP · 감상만 있으면 뽑지 않는다</b> — LLM 이 SKIP 을 반환하면 취소.</li>
 <li><b>250자 초과는 다듬어도 못 살림</b>. 프롬프트를 뚫고 큰 응답이 온 경우.</li></ul></dd>
-<dt>비용</dt><dd><span class="tag t-new">09-18 갱신</span> 꼬리질문 생성은 클라우드 Anthropic Claude 가 서빙한다 — 09-11 실측 기준 콜당 ~2.5원 · 면접당 5~8콜 → 15~20원/면접. 비용 절감을 위해 기본·경계 질문은 캔드 응답($0) + 회사 프로필 근거로 처리해 콜 수를 줄인다. 사내에서 학습했던 Qwen 어댑터(agent·summary·interview)는 완결된 R&D 자산으로 남는다.</dd>
+<dt>비용</dt><dd><span class="tag t-new">09-18 갱신</span> 꼬리질문 생성은 클라우드 Anthropic Claude 가 서빙한다 — 09-11 실측 기준 콜당 ~2.5원 · 면접당 5~8콜 → 15~20원/면접. (캔드 응답 $0 은 아르·지원자 FAQ 의 기본·경계 질문 쪽 장치다 — 꼬리질문과는 별개.) 사내에서 학습했던 Qwen 어댑터(agent·summary·interview)는 <span class="tag t-new">09-28</span> 온프레미스 폐쇄(09-18)와 함께 시연 경로에서 빠졌고 연구·비교 자료로만 남는다.</dd>
 </dl>
 </div>
 </section>
@@ -303,7 +309,7 @@ export type LiveVerdict = {
     &lt;/ul&gt;
   &lt;/div&gt;
 ) : null}</code></pre></dd>
-<dt>왜 판정엔 안 들어가나</dt><dd><code>model.pkl</code> 이 100차원 (음성 86 + mediapipe 14) 으로 학습됐다. 표정 7개 확률을 그대로 넣으면 shape mismatch 로 즉시 죽고, 억지로 평균 등으로 낮추면 잘못된 점수. 그래서 <b>화면 옆에 별도</b> 로만 둔다(ADR-0029/0032). <span class="tag t-new">09-17</span> 게다가 <b>AI 채용 정책상 감정 인식 신호를 판정 입력으로 쓰지 않는다</b> — 표정·음성 신호를 판정/Claude 입력에 넣지 않는 것이 원칙이라, "재학습 뒤 판정 벡터로 이관"은 이 제약 아래에서만 검토한다. 표정은 어디까지나 담당자 참고용 UI.</dd>
+<dt>왜 판정엔 안 들어가나</dt><dd><code>model.pkl</code> 이 100차원 (음성 86 + mediapipe 14) 으로 학습됐다. 표정 7개 확률을 그대로 넣으면 shape mismatch 로 즉시 죽고, 억지로 평균 등으로 낮추면 잘못된 점수. 그래서 <b>화면 옆에 별도</b> 로만 둔다(ADR-0029/0032). <span class="tag t-new">09-17</span> 게다가 <b>AI 채용 정책상 감정 인식 신호를 판정 입력으로 쓰지 않는다</b> — 표정·음성 신호를 판정/Claude 입력에 넣지 않는 것이 원칙이라, "재학습 뒤 판정 벡터로 이관"은 이 제약 아래에서만 검토 대상이었고, 코드 동결(09-20)까지 실행되지 않았다. 표정은 어디까지나 담당자 참고용 UI.</dd>
 <dt>실측</dt><dd>ViT 로드 확인: <code>docker exec arda-lie-detection-1 python -c 'model = AutoModelForImageClassification.from_pretrained(VIT_MODEL); print(model.config.id2label)'</code> → 7종 라벨 정상 반환. 파이프라인 자체는 <b>얼굴 검출 되어야</b> 표정 나옴 — no_face 면 UI 에 표정 없이 판정만.</dd>
 <dt>주의</dt><dd>표정 UI 는 <b>채용자 화면 (InterviewRoom.tsx)</b> 에만. APK (지원자 자리) 에는 표시 안 함 — ADR-0029 "지원자에게 실시간 판정을 보여주면 답변을 바꾼다".</dd>
 </dl>
@@ -338,8 +344,9 @@ STT_TIMEOUT_SEC = float(os.getenv("STT_TIMEOUT_SEC", "180"))</code></pre></dd>
 </dl>
 </div>
 
-<div class="note new"><b>2026-09-18 갱신 · STT 는 OpenAI whisper-1 API 로 서빙한다</b><br>
-<b>OpenAI whisper-1 실시간 전사</b>가 프로덕션 기본이다 (ADR-0038 · 분당 $0.006 → 면접당 ~$0.06). <b>무음 구간 hallucination</b>(빈 소리에 없는 말을 지어냄)은 <code>no_speech_prob</code> 게이트로 완화했다. 로컬 <code>faster-whisper large-v3-turbo</code> 경로는 폴백으로 코드에 남아 있고, 아래 §4 의 CPU int8 180초 상한 논리는 그 로컬 경로 실측 당시의 기록이다.<br>
+<div class="note new"><b>STT 경로 · 설계와 운영 실측 (09-18 갱신 → 09-28 정정)</b><br>
+<b>설계(ADR-0038)</b>: 실시간 면접 전사도 <b>OpenAI whisper-1 API</b> 로 보낸다 (분당 $0.006 → 면접당 ~$0.06). <b>무음 구간 hallucination</b>(빈 소리에 없는 말을 지어냄)은 <code>no_speech_prob</code> 게이트로 완화했다.<br>
+<b>운영 실측(09-17)</b>: <code>STT_BACKEND</code> 가 빈 값이라 두 컨테이너가 다르게 읽었다 — 백엔드(업로드 답변·재전사·아르 음성) = whisper-1 API, 실시간 서버(lie-detection) = <b>CPU 로컬 faster-whisper</b> (ADR-0038 「같은 변수, 두 해석」). 즉 위 §4 의 CPU int8 180초 상한 논리는 09-17 기준 실시간 면접에 실제로 걸려 있던 경로다. 09-18 이후 .env 값은 확인하지 않았다. (09-18 판은 "whisper-1 API 가 프로덕션 기본" 으로 단정했었다.)<br>
 GPU 실측(Tesla T4): faster-whisper large-v3-turbo CUDA fp16 <b>275ms/3s</b> — 로컬 경로를 GPU 에서 돌렸을 때의 참고 수치다.</div>
 </section>
 
@@ -493,6 +500,7 @@ pillow&gt;=10.0</code></pre></dd>
 <p class="one">1.6단계 (권한 분리) + 관리 비밀번호 분리로도 테이블 소유자는 여전히 <code>ALTER TABLE ... DISABLE TRIGGER</code> 로 append-only 잠금을 뚫을 수 있다. <b>막을 수는 없지만 — 우리 서버니까 — 뚫으면 반드시 자국이 남게</b> 할 수 있다.</p>
 <dl>
 <dt>왜 필요</dt><dd>1.6단계까지의 한계: 관리 비밀번호를 아는 사람은 여전히 원장을 다시 쓸 수 있다. ADR-0028 서두의 원칙 ("우리는 못 막을 수 있지만, 고친 사실이 밖에서 드러난다") 을 <b>DB 층에서도</b> 반복 적용.</dd>
+<dt>09-28 최종</dt><dd><span class="tag t-new">동결 상태</span> 코드 동결(09-20) 시점에도 세 갈래 모두 코드로 들어가지 않았다. 원장 사슬 검증 함수(<code>anchoring.verify_chain</code>)는 무결성 API 로 조회할 수 있지만, 게시 배치에서 게시를 멈추는 ③ 연결은 동결 코드에 없다.</dd>
 <dt>세 갈래 (구현 미완 · 팀 결정)</dt><dd><ul>
 <li><b>① Event trigger 로 트리거 상태 변경을 append-only 감사 로그에 기록</b> — PostgreSQL 의 DDL 이벤트 트리거(<code>ddl_command_start</code> · <code>ddl_command_end</code>) 를 잡아 <code>ALTER TRIGGER</code> 이벤트를 <code>document_anchors_trigger_audit</code> 에 append. 이 감사 표에도 append-only 트리거를 걸면 우회는 <b>감사 로그 자체까지 지워야</b> 가능해진다.</li>
 <li><b>② <code>document_anchors.tgenabled</code> 를 주기 감시 · 변경 시 알림</b> — <code>pg_trigger.tgenabled</code> 를 1분마다 확인하는 헬스체크. <code>'D'</code> (disabled) 로 바뀐 순간 슬랙 · 이메일 · 팀 채널에 알림. 이미 있는 n8n 워크플로 구조로 가볍게.</li>
@@ -556,7 +564,7 @@ COMMIT;</code></pre></dd>
 <div class="note warn"><b>주의 · 실 운영에선 절대 하지 않을 것</b>. 이 절차는 시연 데이터(fit-check applicants) 에 한정. 실 지원자 데이터는 무결성 원장을 그대로 보존해야 한다. 오늘 이 절차를 실행할 수 있었던 것은 <b>이 데이터가 시연용</b>이라는 특수 상황.</div>
 </section>
 
-<p class="lede" style="margin-top:40px">근거: 오전 09-10 해부 노트 (변경 없는 기술) · <code>backend/app/api/interviews.py</code> · <code>backend/app/agent/interview_probe.py</code> · <code>ai/lie-detection/feature_extractor.py</code> · <code>ai/lie-detection/interview_ws.py</code> · <code>ai/lie-detection/app.py</code> · <code>ai/lie-detection/requirements-vit.txt</code> · <code>ai/lie-detection/Dockerfile</code> · <code>infra/docker-compose.prod.yml</code> · <code>frontend/app/src/pages/InterviewRoom.tsx</code> · <code>frontend/app/src/pages/InterviewWatch.tsx</code> · <code>frontend/app/src/pages/ApplicantPanel.tsx</code> · <code>frontend/app/src/pages/useLiveAnalysis.ts</code> · <code>frontend/app/src/api/types.ts</code> · <code>frontend/app/src/api/endpoints.ts</code> · <code>backend/alembic/versions/0017_followup_questions.py</code> · <code>docs/03_decision/0028-제출물-무결성-앵커.md</code> · <code>docs/03_decision/0032-추론-모델-3종-확정.md</code>. 작성 2026-09-10 저녁 · <b>2026-09-17 갱신</b> → <b>2026-09-18 클라우드 전환</b>(헥사고날 완결·판단 엔진 클라우드 Anthropic Claude 서빙·STT OpenAI whisper-1 API·ADR-0036~0038·규모 수치 반영).</p>
+<p class="lede" style="margin-top:40px">근거: 오전 09-10 해부 노트 (변경 없는 기술) · <code>backend/app/api/interviews.py</code> · <code>backend/app/agent/interview_probe.py</code> · <code>ai/lie-detection/feature_extractor.py</code> · <code>ai/lie-detection/interview_ws.py</code> · <code>ai/lie-detection/app.py</code> · <code>ai/lie-detection/requirements-vit.txt</code> · <code>ai/lie-detection/Dockerfile</code> · <code>infra/docker-compose.prod.yml</code> · <code>frontend/app/src/pages/InterviewRoom.tsx</code> · <code>frontend/app/src/pages/InterviewWatch.tsx</code> · <code>frontend/app/src/pages/ApplicantPanel.tsx</code> · <code>frontend/app/src/pages/useLiveAnalysis.ts</code> · <code>frontend/app/src/api/types.ts</code> · <code>frontend/app/src/api/endpoints.ts</code> · <code>backend/alembic/versions/0017_followup_questions.py</code> · <code>docs/03_decision/0028-제출물-무결성-앵커.md</code> · <code>docs/03_decision/0032-추론-모델-3종-확정.md</code>. 작성 2026-09-10 저녁 · <b>2026-09-17 갱신</b> → <b>2026-09-18 클라우드 전환</b>(헥사고날 완결·판단 엔진 클라우드 Anthropic Claude 서빙·STT OpenAI whisper-1 API[09-28 정정: 실시간 전사는 CPU 로컬로 갈려 돌았음]·ADR-0036~0038·규모 수치 반영) → <b>2026-09-28 최종</b>(온프레미스 폐쇄 · 코드 동결 <code>8071fd9</code> · 캔드 응답·자료 부족 자동 서류 탈락·면접 링크 메일·데모 리셋 · §1.7 미구현 명시).</p>
 </div>
 </body>
 </html>

@@ -90,7 +90,7 @@ td.name { font-weight: 600; }
 </style>
 </head>
 <body>
-<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
+<div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.<br><br><b>● 최종 갱신 2026-09-28 — 심사 기간 판정·요약은 클라우드 Claude 로 운영, 자료 부족 지원자는 09-18 부터 자동 서류 탈락, 경계선 hold(A안)는 미구현으로 종결.</b><br>09-20 해커톤 제출 이후 코드 동결(main 마지막 커밋 <code>8071fd9</code>, 마지막 머지 PR #354). 아래 24명 수치는 09-11 실측 그대로 보존한다. 심사 기간(09-18~09-28) 신규 지원서는 0건이라 판정 표본은 늘지 않았다. Qwen 어댑터 후속(요약 v2 · career_years 보강)은 보류.</div>
 
 <main>
 
@@ -104,7 +104,7 @@ td.name { font-weight: 600; }
   <strong>2026-09-17 갱신 · 이 문서에서 달라진 것 (핵심 5줄)</strong>
   <ul style="margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--text-dim)">
     <li><b>서류 판정·요약 서빙은 클라우드(AWS)+Anthropic Claude 로 확정(09-18).</b> Qwen 3갈래 어댑터 자체학습은 비용 절감 R&D 자산으로 완결됐다. 아래 서류 24명 실측은 <b>09-11 시점(Claude Haiku 기준)</b> 값으로, 시점을 명시해 둔다.</li>
-    <li><b>헥사고날 부분 적용 완결</b>(ADR-0035 · PR #184~#209): 판정 코드가 <code>backend/app/application/screening.py</code> 로 이관됐다. 규모는 테스트 <b>1072</b>개 · API <b>107</b>개 · 테이블 <b>28</b>개 · ADR <b>0001~0038</b> · 최신 PR <b>#328</b>.</li>
+    <li><b>헥사고날 부분 적용 완결</b>(ADR-0035 · PR #184~#209): 판정 코드가 <code>backend/app/application/screening.py</code> 로 이관됐다. 규모는 테스트 <b>1072</b>개 · API <b>107</b>개 · 테이블 <b>28</b>개 · ADR <b>0001~0038</b> · 최신 PR <b>#328</b> <span style="color:var(--text-mute)">(09-17 기준 · 동결 시점 마지막 머지는 #354)</span>.</li>
     <li><b>"판정 정확성"의 범위를 넓혔다.</b> 서류 점수(문서 심사)뿐 아니라 <b>아르 에이전트 도구 호출 정확도(v9 pass_rate 73.9%)</b> · <b>요약 어댑터 정성 정확도</b>까지 같은 문서에서 다룬다. 새 §9·§10 참조.</li>
     <li><b>같은 자(rubric)로 Claude vs Qwen(R&D) 을 재측정</b>: 69.6% vs 26.1%(도메인 미스매치) → v9 파인튜닝으로 격차 대폭 축소. §10 참조.</li>
     <li><b>신규 기능 반영</b>: 이력서 드래그·드롭 접수(#326) · 같은 사람 재접수 diff UI(#327) · <b>탈락 축 빨간 표시</b>(#328, 서류/면접/종합 어디서 떨어졌는지 한눈에). 홍지민 배지 서사가 정식 diff UI 로 승격됐다.</li>
@@ -273,7 +273,7 @@ td.name { font-weight: 600; }
 <h2>5. 개선 방향 · 세 가지 (반영 현황)</h2>
 
 <div class="card">
-  <h3 style="margin-top:0">A. 경계선 지원자 · 자동 판정 대신 hold <span class="badge hold">미구현 · 팀 결정</span></h3>
+  <h3 style="margin-top:0">A. 경계선 지원자 · 자동 판정 대신 hold <span class="badge hold">미구현 · 최종(09-28) 미구현으로 종결</span></h3>
   <p>55-65 사이 (임계값 ±5) 는 <code>hold</code> 로 두고 담당자 리뷰. 자동 판정 실수 방지.</p>
   <p style="font-size: 12px; color: var(--text-mute);">코드 위치 · <code>backend/app/application/screening.py</code> (경로 이관 · ADR-0035) · <code>if score >= threshold</code> 로직에 경계 범위 추가.</p>
 </div>
@@ -331,6 +331,10 @@ td.name { font-weight: 600; }
     <b>PDF 추출 경로는 정상</b>이고 텍스트가 stub 이다. 아르가 <code>insufficient: true</code> 로 남긴 것은 <b>정상 판단</b>이다.<br>
     <span style="font-size:12.5px;color:var(--text-dim)">같이 발견된 <b>실제 버그</b>: "다시 생성" 버튼에 <code>onClick</code> 이 없어 눌러도 요청이 안 나감(프로덕션 로그 90분 호출 0건). PR #208 로 배선 + 실패 사유(503/422/네트워크) 표시.</span>
   </div>
+  <div style="margin-top:12px;padding:12px 14px;background:rgba(74,222,128,0.08);border-left:3px solid var(--green);border-radius:6px">
+    <strong style="color:var(--green)">최종(09-18 반영 · 09-28 확인) · 자료 부족 지원자는 자동 서류 탈락</strong><br>
+    요약이 <code>insufficient: true</code>(분석할 자료가 없음)로 저장된 지원자는 점수 없이 <code>hold</code> 로 남지 않고 <b>자동 서류 탈락</b>하도록 바뀌었다(#349·#351, ADR-0034 확장 · <code>screening.py</code> <code>_summary_insufficient</code>). 문가영·장우진 같은 "요약 대기" 상태가 더는 쌓이지 않는다. 근거는 "판단할 자료가 비어 있음" 이며, AI 가 정리하고 사람이 결정하는 원칙대로 단계 변경은 담당자 몫으로 남는다.
+  </div>
 </div>
 
 <h2>8. 시연 시나리오 · 09-17 갱신</h2>
@@ -384,7 +388,7 @@ td.name { font-weight: 600; }
 </div>
 
 <div class="footer">
-  <div>작성: suvisdev의 Claude · 2026-09-17 (09-11 서류 실측 유지 · 정확성 측정 절 신설)</div>
+  <div>작성: suvisdev의 Claude · 2026-09-17 (09-11 서류 실측 유지 · 정확성 측정 절 신설) · 최종 갱신 2026-09-28</div>
   <div>DB 실측 기반 · 판정 코드 <code>backend/app/application/screening.py</code> · 프롬프트 <code>chain_evaluate.v2.md</code> · 어댑터 v9 / summary-2026-09-17</div>
 </div>
 

@@ -62,6 +62,7 @@
 </style>
 </head>
 <body>
+<div style="background:#12324a;border-left:4px solid #2f6fed;color:#dbe8fb;padding:14px 18px;margin:0 0 10px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>■ 최종 갱신 2026-09-28 — 심사는 클라우드(<code style="background:rgba(255,255,255,.12);color:#fff">seuk.suvisdev.cloud</code> · Claude) 단독으로 진행 중이다. 코드는 09-18 <code style="background:rgba(255,255,255,.12);color:#fff">8071fd9</code> 이후 동결했고, 09-28 점검에서 컨테이너 5개와 헬스체크 모두 정상이었다. 다음 단계는 10-14~10-27 GPU 풀가동이다.</b> → <a href="#s7" style="color:#9cc3ff">§7</a></div>
 <div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
 
 <header class="top"><div class="inner">
@@ -89,7 +90,7 @@
   <table>
     <tr><th>PC</th><th>IP</th><th>역할</th></tr>
     <tr><td>PC1</td><td>192.168.0.235</td><td>Postgres · api · Caddy · n8n · MinIO · cloudflared(터널) · <b>Ollama (GPU RTX 3050)</b></td></tr>
-    <tr><td>PC2</td><td>192.168.0.115</td><td>lie-detection (거짓말탐지 + <b>STT</b> + 표정 ViT) · RTX 3050</td></tr>
+    <tr><td>PC2</td><td>192.168.0.115</td><td>lie-detection (답변-서류 일관성 대조 + 보조 신호 · <b>STT</b> · 표정 ViT) · RTX 3050</td></tr>
     <tr><td>PC3</td><td>192.168.0.122</td><td>Ollama 예비(standby)</td></tr>
   </table>
   <ul>
@@ -181,7 +182,8 @@
     </ol>
   </div>
 
-  <h2><span class="n">4.</span>AWS 전환 시 반영할 것</h2>
+  <h2><span class="n">4.</span>AWS 전환 시 반영할 것 <span class="badge b-good">반영 완료</span></h2>
+  <p class="muted">09-18 당시 계획. 09-28 확인: 동결 직전에 <code>Seuk-Team/Arda</code> 에 전부 머지·배포됐다 — 데모 로그인 #333(담당자·지원자 버튼, <code>?demo=</code> 자동로그인), 시연계정 잠금 #335·#343, 데모 지원자 로그인마다 초기화 #338·#342. 상세는 §7.</p>
   <div class="card">
     <h3 style="margin-top:0">심사자용 데모 로그인</h3>
     <ul>
@@ -200,8 +202,62 @@
     </ul>
   </div>
 
+  <h2 id="s7"><span class="n">7.</span>09-18 이후 경과 — 최종 결과 <span class="muted">(2026-09-28 기준)</span></h2>
+
+  <h3>7-1. 심사 환경 (클라우드 단독)</h3>
+  <table>
+    <tr><th>항목</th><th>내용</th></tr>
+    <tr><td>심사 URL</td><td><code>https://seuk.suvisdev.cloud</code> · API <code>https://api.seuk.suvisdev.cloud</code></td></tr>
+    <tr><td>LLM</td><td><b>Claude</b> (anthropic 백엔드). 자체 학습 Qwen 어댑터는 시연 경로에서 빠짐 — 연구·비교 자료로만 남음</td></tr>
+    <tr><td>STT</td><td>업로드 답변·재전사·아르 음성 = <code>whisper-1</code> API · 실시간 면접 전사 = CPU 로컬 faster-whisper (09-17 운영 실측 <code>STT_BACKEND</code> 빈 값 — ADR-0038 「같은 변수, 두 해석」. 09-18 이후 값은 미확인)</td></tr>
+    <tr><td>서버</td><td>AWS t3.large (ap-northeast-2c, EBS 50GB) ≈ $2.8/일</td></tr>
+    <tr><td>컨테이너</td><td>5개 — api · db(postgres/pgvector) · caddy · n8n · lie-detection</td></tr>
+    <tr><td>배포</td><td>main merge → 2분 후 자동 반영 (systemd timer). 동결 이후 배포 없음</td></tr>
+  </table>
+
+  <h3>7-2. 코드 동결</h3>
+  <div class="card">
+    <ul>
+      <li><code>Seuk-Team/Arda</code> main 마지막 커밋 <b><code>8071fd9</code></b> (2026-09-18 18:22 KST). 해커톤 제출 마감(09-20) 이후 <b>커밋·브랜치·PR 0건</b>. 열린 PR 은 #311 (09-17, 미머지) 하나. api 컨테이너는 09-18 이후 재시작 없음.</li>
+      <li><b>동결 직전(09-17~18) 반영분</b>: 심사위원 데모 로그인(#333, <code>?demo=</code> 자동로그인) · 시연계정 잠금(#335·#343) · 데모 지원자 로그인마다 인적성·면접일정·AI면접 초기화(#338·#342) · 아르 캔드 응답($0, #334·#347) · 무관 질문 거절을 '데이터 근거' 기준으로 · 지원자 FAQ 가 회사 프로필 근거(#348) · 자료 부족 지원자 자동 서류 탈락(#349·#351, ADR-0034 확장) · 아르 챗 이력서 드래그·드롭 접수·다중첨부(#318·#326·#336) · 이력서 변동 요약 chain·재접수 diff UI(#320·#327) · 탈락 축 빨간 표시(#328) · 면접 실시간 분석 수치 요약→종합평가 · 면접 링크 메일 발송 · 로그인 화면 소개 영상 팝업(#354) · 로그아웃 우측 상단 계정 메뉴 · ERD v2.8</li>
+      <li>2-8 에서 온프레를 접게 만든 <b>아르 채팅 이력서 접수</b>는 클라우드(Claude) 쪽에 드래그·드롭 접수·다중첨부로 반영된 채 동결됐다(#318·#326·#336).</li>
+      <li>ADR 최신: 0038(실시간 전사 OpenAI API). 0035 헥사고날 부분 적용(Full DDD 아님, 5개 컨텍스트) · 0036 SQS 워커 폐기 · 0037 회사 통합 API</li>
+    </ul>
+  </div>
+
+  <h3>7-3. 09-28 상태 점검</h3>
+  <div class="card">
+    <ul>
+      <li>컨테이너 5개(api · db · caddy · n8n · lie-detection) <span class="badge b-good">모두 정상 가동</span></li>
+      <li>GitHub Actions: CI · 외부 헬스체크(수시간 간격, api·front 200 확인, 실패 시 이슈 자동 생성) · 무결성 앵커 게시(매일) — <span class="badge b-good">09-18 이후 전부 성공</span></li>
+    </ul>
+  </div>
+
+  <h3>7-4. 심사 기간 실사용 <span class="muted">(09-18 저녁 ~ 09-28, 개인정보 빼고 요약)</span></h3>
+  <div class="card">
+    <ul>
+      <li><b>아르(담당자 채팅)</b>: 09-09~09-28 누적 62턴 · 입력 ≈ 10.2만 토큰 · 출력 ≈ 1.7만 토큰 · 누적 비용 <b>$0.72</b></li>
+      <li>09-18 이후 데모 계정 질문: 공고 목록 · 지원자 검색·상세(동명이인 처리 정상) · 무관 질문 거절 · 정체성 질문 · 프롬프트 인젝션 시도 2회 — 09-25 건은 요구 문구를 따르지는 않았으나 무관한 동명이인 목록을 답함 <span class="badge b-warn">어색</span>, 09-28 건은 정상 거절</li>
+      <li>단계 변경 6건 · 메일 13건 전부 sent (단계 변경 통보 자동 발송, 직접 작성 4건, 데모 지원자 로그인 리셋에 따른 자동 면접 안내 5건) · 신규 지원서 0건</li>
+    </ul>
+  </div>
+
+  <h3>7-5. 심사위원 데모 계정 <span class="muted">(비밀번호는 문서에 남기지 않음)</span></h3>
+  <ul>
+    <li><b>담당자</b>: 로그인 화면 「담당자 데모」 버튼(<code>?demo=staff</code>) → <code>ab@ab.com</code> (admin). 비밀번호·역할·사용자관리·메일템플릿 변경 잠김</li>
+    <li><b>지원자</b>: 로그인 화면 「지원자 데모」 버튼 → <code>fitcheck-be-01@example.com</code>. 로그인할 때마다 인적성·면접일정·AI면접 세 화면 초기화</li>
+  </ul>
+
+  <div class="card decision">
+    <h3 style="margin-top:0">7-6. 다음 단계 (확정, 미실행)</h3>
+    <ul>
+      <li><b>2026-10-14 ~ 10-27</b> g4dn.xlarge(T4, 서울 $0.647/h ≈ $15.8/일) 24시간 풀가동. 크레딧 누적 전망 $358/$400</li>
+      <li><code>.env</code> 스위치(STT_BACKEND · Ollama · VIT_MODEL) 변경은 <b>해커톤 심사 종료 후에만</b>. 제품 시연 10-27</li>
+    </ul>
+  </div>
+
   <footer>
-    Arda 온프레미스 종합보고 · 2026-09-18 · 이전 <code>Arda_온프레미스_구성보고_2026-09-16</code> · <code>심사기간_반영흐름_2026-09-17</code> 통합·대체 ·
+    Arda 온프레미스 종합보고 · 2026-09-18 · 최종 갱신 2026-09-28(§7 추가) · 이전 <code>Arda_온프레미스_구성보고_2026-09-16</code> · <code>심사기간_반영흐름_2026-09-17</code> 통합·대체 ·
     상세 원문은 동명 <code>.md</code> 파일 참고
   </footer>
 

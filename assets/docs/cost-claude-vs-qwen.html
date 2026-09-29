@@ -110,6 +110,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
 </style>
 </head>
 <body>
+<div style="background:#0f2a1c;border-left:4px solid #34d399;color:#c9f2de;padding:14px 18px;margin:0 0 12px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 최종 갱신 2026-09-28 — 심사는 클라우드 + Claude 로 진행 · 아르 실사용 누적 62턴 $0.72 · 인프라 t3.large ≈ $2.8/일 · 10-14~10-27 GPU 계획 추가 · GPU 단가 서울 $0.647/h 로 정정</b><br>09-20 제출 이후 코드는 동결(main 마지막 커밋 <code>8071fd9</code>, 09-18). 온프레미스(학원 PC 3대 · 로컬 Qwen)는 09-18 폐쇄했고, 자체 학습 Qwen 어댑터는 시연 경로에서 빠져 연구·비교 자료로만 남는다. 실측 결과는 아래 <a href="#final" style="color:#6ee7b7">「최종 결과 09-28」</a> 절. 09-11 판의 GPU 단가 "$0.71/h" 는 도쿄 가격 오기라 본문·계산식 모두 서울 $0.647/h 로 고쳤다.</div>
 <div style="background:#3a2a10;border-left:4px solid #e6a23c;color:#f0d9a8;padding:14px 18px;margin:0 0 16px;font-size:14px;line-height:1.7;font-family:system-ui,-apple-system,sans-serif;border-radius:6px;"><b>● 2026-09-18 갱신 — 클라우드 전환 (현재 기준)</b><br>이 문서는 <b>온프레미스 자체 서빙·Qwen 자체학습</b> 기준으로 작성됐다. 프로젝트는 이후 <b>심사·운영을 클라우드(AWS · seuk.suvisdev.cloud)에서 Anthropic Claude 기반</b>으로 확정했다. 아래 온프레미스/자체학습/"Claude API 미의존" 서술은 당시 기록이며, 현재 심사 기준은 클라우드·Claude 다.</div>
 
 <div class="wrap">
@@ -120,6 +121,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     <span><b>발주</b> suvisdev (수택 · 인프라·총괄)</span>
     <span><b>초판</b> 2026-09-11</span>
     <span><b>갱신</b> 2026-09-17</span>
+    <span><b>최종</b> 2026-09-28 (심사 기간 실사용 반영)</span>
     <span><b>데이터</b> agent_traces n=21 · Qwen v9 eval · GPU 실측 · 클라우드 운영</span>
     <span><b>대상</b> Anthropic Haiku 4.5 API <span style="color:var(--ink-mute)">↔</span> 온프레미스 Qwen3 3어댑터 자체학습</span>
   </div>
@@ -144,7 +146,8 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
 </div>
 
 <nav class="jump">
-  <a href="#decision" style="color:var(--emerald)">결정 <b>NOW</b></a><span class="sep">·</span>
+  <a href="#final" style="color:var(--amber)">최종 <b>09-28</b></a><span class="sep">·</span>
+  <a href="#decision" style="color:var(--emerald)">결정</a><span class="sep">·</span>
   <a href="#perf">성능·측정</a><span class="sep">·</span>
   <a href="#ax1">① 비용 실측</a><span class="sep">·</span>
   <a href="#ax1b">①-B 품질 비교</a><span class="sep">·</span>
@@ -156,6 +159,73 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
   <a href="#ax8">⑦ 대안</a><span class="sep">·</span>
   <a href="#pres">발표</a>
 </nav>
+
+<!-- ======================== 최종 결과 (2026-09-28) ======================== -->
+<section class="section" id="final" style="border-color:var(--amber)">
+  <h2><span class="axis" style="color:var(--amber);background:rgba(251,191,36,.1)">최종</span> 심사 기간 실사용 · 운영 비용 · 이후 계획 <span class="tag">2026-09-28</span></h2>
+
+  <div class="callout good">
+    <b>결과</b> · 해커톤 심사는 <b>클라우드 <code>seuk.suvisdev.cloud</code> (API <code>api.seuk.suvisdev.cloud</code>) + Anthropic Claude</b> 로 진행됐다.
+    온프레미스(학원 PC 3대 · 로컬 Qwen)는 09-18 에 닫았고, 자체 학습 Qwen 어댑터는 시연 경로에서 빠져 <b>연구·비교 자료</b>로만 남는다.
+    09-20 제출 이후 코드 변경·배포는 없다(마지막 커밋 <code>8071fd9</code>, 09-18).
+  </div>
+
+  <h3 style="margin-top:18px">아르(담당자 채팅) 실사용 · prod DB 읽기 전용 조회 <span class="tag">09-09 ~ 09-28</span></h3>
+  <div class="grid grid-4">
+    <div class="stat" style="border-color:var(--emerald)">
+      <div class="k">누적 Claude 비용</div>
+      <div class="v" style="color:var(--emerald)">$0.72</div>
+      <div class="n">09-09~09-28 전체 누적 · 아르 채팅</div>
+    </div>
+    <div class="stat">
+      <div class="k">누적 대화 턴</div>
+      <div class="v">62<span class="u">턴</span></div>
+      <div class="n">턴당 평균 ≈ $0.012 (계산)</div>
+    </div>
+    <div class="stat">
+      <div class="k">누적 토큰 · 입력 / 출력</div>
+      <div class="v">≈10.2<span class="u">만</span> / ≈1.7<span class="u">만</span></div>
+      <div class="n">프리픽스 캐시 · 캔드 응답($0) 적용 상태</div>
+    </div>
+    <div class="stat">
+      <div class="k">운영 인프라 · AWS t3.large</div>
+      <div class="v">≈$2.8<span class="u">/일</span></div>
+      <div class="n">ap-northeast-2c · EBS 50GB · 컨테이너 5개(api·db·caddy·n8n·lie-detection) · 09-28 모두 정상</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:14px">
+    <b>이 숫자가 말하는 것</b> · 심사 기간을 포함한 20일치 Claude 사용료($0.72)가 <b>서버 하루치($2.8)의 약 1/4</b> 이다.
+    이 규모에서 비용의 대부분은 LLM 호출이 아니라 서버 상시 비용이다 — 판단 엔진을 Claude 로 둔 결정이 비용 면에서도 부담이 아니었다는 실측 근거다.
+    심사 기간 질문은 공고 목록 · 지원자 검색·상세(동명이인 처리 정상) · 무관 질문 거절 · 정체성 질문 · 프롬프트 인젝션 시도 2회였다
+    (09-25 1건은 요구 문구를 따르지 않았지만 무관한 동명이인 목록을 답해 어색했고, 09-28 건은 정상 거절).
+  </div>
+
+  <h3 style="margin-top:22px">이후 계획 · GPU 풀가동 <span class="tag">확정 · 미실행</span></h3>
+  <div class="grid grid-4">
+    <div class="stat">
+      <div class="k">인스턴스</div>
+      <div class="v">g4dn.xlarge</div>
+      <div class="n">Tesla T4 · 서울 리전</div>
+    </div>
+    <div class="stat">
+      <div class="k">단가 · 서울</div>
+      <div class="v">$0.647<span class="u">/h</span></div>
+      <div class="n">≈ $15.8/일 (24시간 가동) · t3.large 의 약 5.6배</div>
+    </div>
+    <div class="stat">
+      <div class="k">기간</div>
+      <div class="v">10-14 ~ 10-27</div>
+      <div class="n">14일 × $15.8 ≈ $221 (계산) · 제품 시연 10-27</div>
+    </div>
+    <div class="stat" style="border-color:var(--amber)">
+      <div class="k">크레딧 누적 전망</div>
+      <div class="v" style="color:var(--amber)">$358<span class="u">/ $400</span></div>
+      <div class="n">한도 안 · 여유 약 $42</div>
+    </div>
+  </div>
+  <p class="footnote">조건 · 해커톤 심사가 끝난 뒤에만 서버 <code>.env</code> 스위치(<code>STT_BACKEND</code> · Ollama · <code>VIT_MODEL</code>)를 바꾼다. 심사 기간 동안 심사 서버 구성은 그대로 둔다. 09-11 판에 적힌 "$0.71/h" 는 도쿄 가격 오기이며, 이 문서의 계산(축 ②~④)도 서울 $0.647/h 로 고쳤다.</p>
+</section>
 
 <!-- ======================== 결정 (2026-09-17) ======================== -->
 <section class="section" id="decision" style="border-color:var(--emerald)">
@@ -306,8 +376,8 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
     </div>
     <div class="stat">
       <div class="k">AWS g4dn.xlarge · 서울 <span class="u">(당시 GPU 후보)</span></div>
-      <div class="v">$0.71<span class="u">/h + $0.014/h (EBS 100GB gp3)</span></div>
-      <div class="n">09-11 로컬 모델용 GPU 후보 · <b>실 서빙은 Claude API</b>라 판단 엔진용 GPU 는 불필요</div>
+      <div class="v">$0.647<span class="u">/h + $0.014/h (EBS 100GB gp3)</span></div>
+      <div class="n">09-11 로컬 모델용 GPU 후보 · <b>실 서빙은 Claude API</b>라 판단 엔진용 GPU 는 불필요 · <b>09-28 정정</b>: 09-11 판 "$0.71/h" 는 도쿄 가격 오기 · 10-14~10-27 풀가동 계획은 <a href="#final">최종</a> 절</div>
     </div>
     <div class="stat">
       <div class="k">로컬 chat 어댑터 · v9 (09-17)</div>
@@ -464,7 +534,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
   <div class="callout" style="margin-top:14px">
     <b>참고 계산식</b> · 면접 1건 Anthropic 비용 =
     <code>답변수 × (입력 × in_rate + 출력 × out_rate)</code> + 도구호출 × 트레이스평균비용
-    · GPU(로컬 모델 대안) 비용 = <code>운용시간 × $0.71/h + 24h × $0.014/h (EBS)</code>
+    · GPU(로컬 모델 대안) 비용 = <code>운용시간 × $0.647/h (서울) + 24h × $0.014/h (EBS)</code>
     · <b>로컬 GPU 상시 운용은 이 GPU 임대 축의 자체 하드웨어 대안</b>이며 호출당 추가 과금이 없다(비용 절감 R&amp;D 비교축).
   </div>
 </section>
@@ -636,8 +706,8 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
       <tr>
         <td><b>AWS g4dn.xlarge (클라우드 GPU)</b></td>
         <td>관리 편의 · 온디맨드</td>
-        <td>$0.71/h + EBS · 상시 운용 시 비용 누적. 데이터가 클라우드에 상주.</td>
-        <td><span class="pill r">❌ 시연/실측만</span></td>
+        <td>$0.647/h(서울) + EBS · 상시 운용 시 비용 누적. 데이터가 클라우드에 상주.</td>
+        <td><span class="pill r">❌ 시연/실측만</span><br><span class="pill a" style="margin-top:4px">10-14~27 계획</span></td>
       </tr>
       <tr>
         <td><b>온프레미스 PC 3대 + Ollama</b></td>
@@ -690,7 +760,7 @@ nav.jump .sep{color:var(--ink-mute);align-self:center}
 
 <p class="footnote" style="text-align:center;margin-top:24px">
   자료 출처: agent_traces (prod DB) · Anthropic API pricing · AWS EC2 Seoul pricing · Qwen3 QLoRA eval(v9) · Ollama benchmark · GPU 실측(T4) · ADR-0024·0029·0031·0032·0038 · <br>
-  초판 2026-09-11 · <b>갱신 2026-09-17 (결정 완료)</b> · suvisdev
+  초판 2026-09-11 · 갱신 2026-09-17 (결정 완료) · <b>최종 갱신 2026-09-28 (심사 기간 실사용 · GPU 계획 · 서울 단가 정정)</b> · suvisdev
 </p>
 
 </div>
@@ -710,7 +780,7 @@ const state = {
 
 const RATE_OUT = 5.0;         // $/1M output tokens (Haiku 4.5)
 const TRACE_COST_AVG = 0.00704; // $/도구호출 · agent_traces 실측 평균
-const GPU_HOURLY = 0.71;      // $/h g4dn.xlarge 서울 (당시 클라우드 후보)
+const GPU_HOURLY = 0.647;     // $/h g4dn.xlarge 서울 (09-28 정정: 09-11 판 0.71 은 도쿄 가격 오기)
 const EBS_HOURLY = 0.014;     // $/h 100GB gp3
 const EBS_DAILY = EBS_HOURLY * 24;  // ~$0.336/일
 

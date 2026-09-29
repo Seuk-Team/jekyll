@@ -101,6 +101,8 @@
   <p>동일 케이스 23건 · 동일 채점기(<code>judge.py</code>) · 09-11 / 09-12 / 09-17 실측. 모든 수치는 저장소 eval·벤치 데이터 인용 · 작성 2026-09-22</p>
 </header>
 
+<div class="note"><b>최종 갱신 2026-09-28 — 결론 그대로 심사 기간 내내 클라우드+Claude 로 운영됐고, Qwen 은 연구·비교 자료로 남았다.</b> 09-18 온프레미스(로컬 Qwen 서빙) 폐쇄 · 09-20 제출 이후 코드 동결. 아래 수치는 09-11~09-17 실측 그대로다. 심사 기간 아르 실사용: 09-09~09-28 누적 <b>62턴 · $0.72</b>. Qwen 후속(요약 v2 · career_years 보강 · 09-18 학습한 chat v10 평가)은 <b>보류</b>.</div>
+
 <div class="concl"><b>한 줄 결론</b> — 같은 자로 재니 학습 전 Qwen <b>26.1%</b> → Claude <b>69.6%</b> 로 격차가 컸고, 자체학습 v9가 <b>73.9%</b>로 넘어섰다. 다만 <b>품질의 성격</b>이 다르다: Qwen(학습 전)은 "판단은 맞는데 도구 언어를 못 말함", Claude는 "안전한 순서로 가다 단일턴 채점에 걸림", v9는 "남은 실패 6건 중 5건이 UX상 정상". 심사 서빙은 품질·안정성·트래픽 이유로 클라우드+Claude 확정.</div>
 
 <!-- 1. 헤드라인 -->
@@ -208,9 +210,9 @@
     <tr><th>항목</th><th>Claude API</th><th>Qwen 자체 서빙</th></tr>
     <tr><td>과금 구조</td><td>사용량(토큰)만 · 고정비 0</td><td>호출당 0 · GPU 고정비 $0.71/h(+EBS $0.014/h)</td></tr>
     <tr><td>기본·경계 질문</td><td class="ok">캔드 응답 $0 (FAQ)</td><td>—</td></tr>
-    <tr><td>STT</td><td colspan="2">OpenAI <code>whisper-1</code> $0.006/min ≈ $0.06/면접 (클라우드 서빙 기본 경로)</td></tr>
+    <tr><td>STT</td><td colspan="2">OpenAI <code>whisper-1</code> $0.006/min ≈ $0.06/면접 (클라우드 서빙 기본 경로 · 09-28 주: 09-17 운영 실측에선 업로드 답변·재전사·아르 음성만 이 API, 실시간 면접 전사는 CPU 로컬 faster-whisper)</td></tr>
   </table>
-  <p class="sub">※ eval 1건($0.0139)이 실사용($0.0075)보다 비싼 이유: eval은 전체 시스템 프롬프트를 매 건 포함(입력 13.4K tok/건). 실사용은 캐시·짧은 대화로 더 싸다.</p>
+  <p class="sub">※ eval 1건($0.0139)이 실사용($0.0075)보다 비싼 이유: eval은 전체 시스템 프롬프트를 매 건 포함(입력 13.4K tok/건). 실사용은 캐시·짧은 대화로 더 싸다.<br>※ GPU <b>$0.71/h</b> 는 도쿄 가격 오기 — 서울 g4dn.xlarge 는 <b>$0.647/h</b> (09-28 주석, 손익분기 수치는 당시 계산 그대로).</p>
 </div>
 
 <!-- 7. 속도 -->
@@ -236,7 +238,7 @@
     <tr><td>완화 조치</td><td class="ok">✓ <code>no_speech_prob</code> ≥ 0.6 조각 폐기</td><td class="ok">✓ VAD 필터 + 이전 문맥 미참조</td></tr>
     <tr><td>실시간 예산(1.5초) 준수</td><td class="ok">✓ API 응답</td><td class="bad">✕ CPU(t3.large)에서 44초 발화 → 180초 초과 · 연쇄 지연</td></tr>
   </table>
-  <p class="sub">전사 정확도 자체는 두 엔진 비슷(재현 클라이언트 12/12 정확). 차이는 <b>지연과 무음 처리</b>였고, 클라우드는 API + 게이트로 정리했다.</p>
+  <p class="sub">전사 정확도 자체는 두 엔진 비슷(재현 클라이언트 12/12 정확). 차이는 <b>지연과 무음 처리</b>였고, 클라우드는 API + 게이트로 정리했다. <b>09-28 정정:</b> ADR-0038 기본은 실시간 전사도 API 지만, 09-17 운영 실측(<code>STT_BACKEND</code> 빈 값)에선 업로드 답변·재전사·아르 음성 = <code>whisper-1</code> API, 실시간 면접 전사 = CPU 로컬 faster-whisper 로 갈려 돌았다(ADR-0038 「같은 변수, 두 해석」). 09-18 이후 운영 <code>.env</code> 는 미확인.</p>
 </div>
 
 <!-- 9. 해석 주의 -->
@@ -252,7 +254,7 @@
 
 <div class="concl"><b>정리</b> — 정확도는 v9가 Claude와 동급(73.9 vs 69.6)까지 올라왔고, 실패의 질도 둘 다 "위험한 실패 0건"으로 안전하다. 갈린 곳은 <b>수치 추론·형식 안정성(요약 어댑터)</b>과 <b>지연·동시성(콜드 78초·대기줄)</b>이며, 이것이 심사 서빙을 클라우드+Claude로 확정한 이유다. Qwen 자체학습은 "public API 없이도 갈 수 있는가"에 실측으로 답한 <b>비용 절감 R&amp;D 자산</b>으로 남는다.</div>
 
-<footer>Team Seuk · Arda — 2026-09-22 · 출처: <code>ai/qwen-training</code>(judge·eval) · 09-11 로컬 Qwen eval · 09-12 Claude Haiku eval(<code>eval_anthropic.py</code>) · 09-17 v9·GPU 벤치 · 비용비교 데이터(JSON 4세그먼트). 팔레트: 검증된 기본 카테고리 3슬롯(파랑·주황·아쿠아, 전 쌍 CVD ΔE ≥ 9) · 상태색은 아이콘+라벨 동반.</footer>
+<footer>Team Seuk · Arda — 2026-09-22 · 최종 갱신 2026-09-28 · 출처: <code>ai/qwen-training</code>(judge·eval) · 09-11 로컬 Qwen eval · 09-12 Claude Haiku eval(<code>eval_anthropic.py</code>) · 09-17 v9·GPU 벤치 · 비용비교 데이터(JSON 4세그먼트). 팔레트: 검증된 기본 카테고리 3슬롯(파랑·주황·아쿠아, 전 쌍 CVD ΔE ≥ 9) · 상태색은 아이콘+라벨 동반.</footer>
 </div>
 </body>
 </html>
